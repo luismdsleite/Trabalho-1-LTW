@@ -1,12 +1,25 @@
 .holes_grid {
     justify-items: center;
-    width: 90vw;
-    height: 60vh;
     display: grid;
-    grid-template-columns: auto auto auto auto auto auto auto auto;
-    grid-template-rows: 30vh 30vh;
+    grid-template-rows: repeat(1, 1fr);
     margin-left: 5vw;
     border-radius: 3em;
+    grid-template-columns: 10% 80% 10%;
+}
+
+.small_holes_grid {
+    width: 100%;
+    height: 100%;
+}
+
+.small_holes_top {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+}
+
+.small_holes_bottom {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
 }
 
 .hole:active {
@@ -14,40 +27,35 @@
     filter: brightness(0.85);
 }
 
-.big_hole_left {
-    grid-row-start: 1;
-    grid-row-end: 3;
-    grid-column-start: 1;
-    margin-top: 40%;
-    text-align: right;
-
-}
-
-.big_hole_right {
-    grid-row-start: 1;
-    grid-row-end: 3;
-    grid-column-start: 8;
-    margin-bottom: 40%;
-    text-align: left;
-}
-
 .big_hole {
     position: relative;
     align-self: center;
-    width: 80%;
+    width: 50%;
     height: 80%;
     border-radius: 5em;
 
 }
 
+.big_hole_left {
+    margin-top: 30%;
+    text-align: right;
+
+}
+
+.big_hole_right {
+    margin-bottom: 30%;
+    text-align: left;
+}
+
+
 .small_hole {
-    align-self: center;
     height: 8vw;
     width: 8vw;
     border-radius: 50%;
+    margin: 10%;
 }
 
-.seed{
+.seed {
     height: 20%;
     width: 40%;
     border-radius: 50%;
