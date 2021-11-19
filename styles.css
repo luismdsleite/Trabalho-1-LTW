@@ -1,0 +1,23 @@
+.holes_grid {
+    background-image: url(wood-texture.png);
+    border-bottom: 0.5rem solid #e8a45b;
+    box-shadow: 0 0 5px #333;
+}
+
+.hole{
+    background-color:rgba(194, 125, 52,0.65);
+    box-shadow: inset 10px 10px 10px rgba(0,0,0,0.5);
+}
+
+.holes_grid>div {
+    font-weight: bolder;
+}
+
+body{
+    background-image: url(background.jpg);
+}
+
+.seed{
+    background-color: rgb(192, 87, 108);
+    box-shadow: inset 10px 10px 10px rgba(0,0,0,0.5);
+}
