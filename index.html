@@ -13,7 +13,18 @@
 <body>
   <div class = "interface">
     <h1 class = "neonText">Mancala</h1>
-    <span class="rules">Regras de Jogo<br></span>
+    <button data-pop-target="#pop">Regras de jogo</button>
+    <div id ="pop" class="pop">
+      <div class="pop-header">
+        <div class="title">Regras de Jogo</div>
+        <button data-close-button class="close-button">&times;</button>
+      </div>
+      <div class=pop-body>
+        Bla bla bla ...
+      </div>
+    </div>
+  <div id="overlay"></div>
+
     <span class="autentication">Autenticação<br></span> 
     <h2 class="configuration">Configuração</h2>
   </div>
@@ -42,7 +53,7 @@
     </div>
     <div class="hole bigHole bigHoleRight">B</div>
   </div>
-
+<script src="script.js"></script>
 </body>
 
 </html>
