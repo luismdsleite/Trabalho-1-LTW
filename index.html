@@ -23,9 +23,22 @@
         Bla bla bla ...
       </div>
     </div>
-  <div id="overlay"></div>
-
-    <span class="autentication">Autenticação<br></span> 
+    <div id="overlay"></div>
+    <button data-pop2-target="#pop2">Autenticação<br></button>
+    <div id="pop2" class ="pop">
+      <div class="pop-header">
+        <div class="title">Autenticação</div>
+        <button data-close2-button class="close-button">&times;</button>
+      </div>
+      <div class=pop-body>
+        <form>
+          <label for="fname">Nome do Utilizador:</label><br>
+          <input type="text" id="fname" name="fname"><br>
+          <label for="pword">Palavra-Passe:</label><br>
+          <input type="password" id="pword" name="pword">
+        </form>
+      </div>
+    </div>
     <h2 class="configuration">Configuração</h2>
   </div>
 
