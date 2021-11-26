@@ -8,8 +8,6 @@ h1 {
 
 }
 
-
-
 .holesGrid {
     background-image: url(wood-texture.png);
     border-bottom: 0.5rem solid #e8a45b;
@@ -41,15 +39,21 @@ h1 {
 }
 
 .button-1 {
-    background-color: rgb(235, 165, 93);
+    margin-right: 0.5em;
+    background-color: #946B45;
     border: transparent;
-    text-decoration: underline;
-    font-size: 2em;
+    padding: 0.5em;
+    font-size: 2rem;
     font-weight: bold;
     border-radius: 0.5em;
-    color: rgb(95, 63, 29);
+    color: #fff;
 }
 
 form {
     font-size: 1rem;
+}
+
+.pop_title {
+    font-size: 1.25rem;
+    font-weight: bold;
 }
