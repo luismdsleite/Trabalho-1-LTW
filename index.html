@@ -3,9 +3,11 @@
 <html lang="pt">
 
 <head>
-
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="properties.css">
+  <script src="script.js" defer></script>
+  <script src="board.js" defer></script>
   <meta charset="UTF-8">
   <title>Mancala</title>
 </head>
@@ -13,18 +15,19 @@
 <body>
   <h1 class="neonText">Mancala</h1>
   <div class="interface">
-    
+    <div id="overlay"></div>
+    <!-- Rules pop up -->
     <button class="button-1" data-pop-target="#pop">Regras de jogo</button>
     <div id="pop" class="pop">
       <div class="pop-header">
         <div class="pop_title">Regras de Jogo</div>
         <button data-close-button class="close-button">&times;</button>
       </div>
-      <div class=pop-body>
+      <div class="pop-body">
         Bla bla bla ...
       </div>
     </div>
-    <div id="overlay"></div>
+    <!-- Authentication Pop -->
     <button class="button-1" data-pop-target="#pop2">Autenticação<br></button>
     <div id="pop2" class="pop">
       <div class="pop-header">
@@ -32,14 +35,13 @@
         <button data-close-button class="close-button">&times;</button>
       </div>
       <div class=pop-body>
-        <form>
+        <form id="authentication-form">
           <label for="fname">Nome do Utilizador:</label><br>
-          <input type="text" id="fname" name="fname"><br>
-          <label for="pword">Palavra-Passe:</label><br>
-          <input type="password" id="pword" name="pword">
+          <input type="text" id="fname" name="fname_name"><br>
         </form>
       </div>
     </div>
+    <!-- Configuration Pop -->
     <button class="button-1" data-pop-target="#pop3">Configuração<br></button>
     <div id="pop3" class="pop">
       <div class="pop-header">
@@ -47,12 +49,15 @@
         <button data-close-button class="close-button">&times;</button>
       </div>
       <div class=pop-body>
-        Configuração
+        <form id="config-form">
+          <label for="holes_number">Número de cavidades:</label>
+          <input type="number" id="holes_number" name="holes_number_name" min="2" max="14">
+        </form>
       </div>
     </div>
   </div>
 
-  <div class="holesGrid">
+  <div id="board" class="holesGrid">
     <div class="hole bigHole bigHoleLeft">A</div>
     <div class="smallHolesGrid">
       <div class="smallHolesTop">
@@ -76,7 +81,6 @@
     </div>
     <div class="hole bigHole bigHoleRight">B</div>
   </div>
-  <script src="script.js"></script>
 </body>
 
 </html>

@@ -8,7 +8,7 @@ openPopButton.forEach(button => {
 		const pop = document.querySelector(button.dataset.popTarget);
 		openPop(pop);
 	});
-})
+});
 
 // Listener to close all active pops when clicking anywhere outside pop or popheader
 overlay.addEventListener('click', () => {
@@ -16,7 +16,7 @@ overlay.addEventListener('click', () => {
 	pops.forEach(pop => {
 		closePop(pop);
 	});
-})
+});
 
 // Listener on x button to close pop
 closePopButton.forEach(button => {
@@ -24,7 +24,7 @@ closePopButton.forEach(button => {
 		const pop = button.closest('.pop');
 		closePop(pop);
 	});
-})
+});
 
 function openPop(pop) {
 	if (pop == null) return;
@@ -37,3 +37,4 @@ function closePop(pop) {
 	pop.classList.remove('active');
 	overlay.classList.remove('active');
 }
+
