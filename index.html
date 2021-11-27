@@ -51,27 +51,27 @@
       <div class=pop-body>
         <form id="config-form">
           <label for="holesNum">Número de cavidades:</label>
-          <input type="number" id="holesNum" name="holes_num_name" min="2" max="14"><br>
+          <input type="number" id="holesNum" name="holes_num_name" min="2" max="14" value="6"><br>
           <label for="seedsNum">Número de sementes por cavidade:</label>
-          <input type="number" id="seedsNum" name="seeds_num_name" min="2" max="14"><br>
+          <input type="number" id="seedsNum" name="seeds_num_name" min="2" max="14" value="6"><br>
+          <label>Adversário:</label>
+          <select>
+            <optgroup label=Computador(IA)>
+              <option>Dificuldade I</option>
+              <option>Dificuldade II</option>
+              <option>Dificuldade III</option>
+            </optgroup>
+            <option>Jogador</option>
+          </select><br>
+          <label>Primeiro a jogar:</label>
+          <select>
+            <option>Começar a jogar</option>
+            <option>Dar a vez ao adversário</option>
+          </select>
           <button type="button" id="configFormButton">Submit</button>
         </form>
-        <label>Adversário:</label>
-        <select>
-          <option disabled selected value></option>
-          <optgroup label=Computador(IA)>
-          <option>Dificuldade I</option>
-          <option>Dificuldade II</option>
-          <option>Dificuldade III</option>
-          </optgroup>
-          <option>Jogador</option>
-        </select><br>
-        <label>Primeiro a jogar:</label>
-        <select>
-          <option disabled selected value></option>
-          <option>Começar a jogar</option>
-          <option>Dar a vez ao adversário</option>
-        </select>
+        
+        
       </div>
     </div>
   </div>
