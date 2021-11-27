@@ -37,4 +37,3 @@ function closePop(pop) {
 	pop.classList.remove('active');
 	overlay.classList.remove('active');
 }
-
