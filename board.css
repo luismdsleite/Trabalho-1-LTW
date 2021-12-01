@@ -2,6 +2,10 @@
 This file contains all of the board related propertied 
 (things related to style like shadows, etc are still stored on styles.css)
 */
+
+.hole{
+  position: relative;
+}
 .holesGrid {
   margin-top: 5vh;
   height: 40vh;
@@ -24,7 +28,7 @@ This file contains all of the board related propertied
   height: 100%;
 }
 
-.smallHolesTop {
+.smallHolesTop, .smallHolesBottom {
   display: grid;
   height: 50%;
   width: 100%;
@@ -33,14 +37,7 @@ This file contains all of the board related propertied
   grid-template-columns: repeat(6, 1fr);
 }
 
-.smallHolesBottom {
-  display: grid;
-  height: 50%;
-  width: 100%;
-  align-items: center;
-  justify-items: center;
-  grid-template-columns: repeat(6, 1fr);
-}
+
 
 .bigHole {
   align-self: center;
@@ -52,13 +49,11 @@ This file contains all of the board related propertied
 .bigHoleLeft {
   margin-bottom: 10%;
   margin-top: 30%;
-  text-align: right;
 }
 
 .bigHoleRight {
   margin-top: 10%;
   margin-bottom: 30%;
-  text-align: left;
 }
 
 
@@ -69,7 +64,5 @@ This file contains all of the board related propertied
 }
 
 .seed {
-  height: 20%;
-  width: 40%;
   border-radius: 50%;
 }

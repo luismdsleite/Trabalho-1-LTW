@@ -52,25 +52,32 @@ configForm.children.configFormButton.addEventListener('click', parseConfigs, fal
 
 
 function parseConfigs() {
-    let pitsNum = parseInt(configForm.children.holesNum.value);
-    let seedsNum = parseInt(configForm.children.seedsNum.value);
-    // If not all values were filled
-    if (seedsNum == undefined || pitsNum == undefined) {
-        return;
-    }
-    // If within expected range
-    else if (seedsNum >= minSeeds && seedsNum <= maxSeeds && pitsNum >= minPits && pitsNum <= maxPits) {
-        // If no board was previously created
-        if (board === undefined) {
-            board = new Board(pitsNum, seedsNum, document.getElementById("board"));
-            board.initHoles();
-        }
-    }
-	// Disabling inputs and selects to make sure user doesnt change them mid game
-	var nodes = configForm.childNodes;
-    for(var i=0; i<nodes.length; i++) {
-        	nodes[i].disabled = true;
-    }
-    closePop(configPop);
+	let pitsNum = parseInt(configForm.children.holesNum.value);
+	let seedsNum = parseInt(configForm.children.seedsNum.value);
+	// If not all values were filled
+	if (seedsNum == undefined || pitsNum == undefined) {
+		return;
+	}
+	// If within expected range
+	else if (board === undefined) {
+		// If no board was previously created
+		if (seedsNum >= minSeeds && seedsNum <= maxSeeds && pitsNum >= minPits && pitsNum <= maxPits) {
+			board = new Board(pitsNum, seedsNum, document.getElementById("board"));
+			board.initHoles();
+			board.initSeeds();
+			// Disabling inputs and selects to make sure user doesnt change them mid game
+			var nodes = configForm.childNodes;
+			for (var i = 0; i < nodes.length; i++) {
+				nodes[i].disabled = true;
+			}
+			
+		}
+		else{
+			window.alert("Input invalido são aceites entre " + minPits + " a " + maxPits +
+				" cavidades por linha e entre " + minSeeds + " a " + maxPits + " sementes por cavidade");
+		}
+	}
+
+	closePop(configPop);
 
 }
