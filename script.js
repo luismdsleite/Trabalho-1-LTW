@@ -63,13 +63,14 @@ function parseConfigs() {
 		// If no board was previously created
 		if (seedsNum >= minSeeds && seedsNum <= maxSeeds && pitsNum >= minPits && pitsNum <= maxPits) {
 			board = new Board(pitsNum, seedsNum, document.getElementById("board"));
-			board.initHoles();
-			board.initSeeds();
+			
 			// Disabling inputs and selects to make sure user doesnt change them mid game
 			var nodes = configForm.childNodes;
 			for (var i = 0; i < nodes.length; i++) {
 				nodes[i].disabled = true;
 			}
+
+			board.initBoard();
 			
 		}
 		else{

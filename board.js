@@ -20,6 +20,7 @@ class Board {
     pits; // Number of seeds each pit has (including both stores)
     pitsElem; // all pits and stores divs
     boardID; // ID where board will be constructed
+    boolMyTurn; // Bool indicating whose turn it is
 
     constructor(pitsNum, seedsNum, boardID) {
         this.pitsNum = pitsNum;
@@ -32,10 +33,17 @@ class Board {
         this.pits[0] = 0;
         this.pits[pitsNum] = 0;
         this.boardID = boardID;
+        this.pitsElem = [];
     }
 
     initBoard() {
-
+        this.initHoles();
+        this.initSeeds();
+        console.log("pits = " + this.pitsNum);
+        for (let i = 1; i < this.pitsNum+1; i++) {
+            console.log(this.pitsElem[i]);
+            this.pitsElem[i].addEventListener("click", this.clickPit, false);
+        }
     }
 
     // Generates all stores and pits
@@ -83,8 +91,8 @@ class Board {
             this.pitsElem[1 + this.pitsNum + i] = div;
         }
 
-        this.pitsElem[0] = myStore;
-        this.pitsElem.push(enemyStore);
+        this.pitsElem[0] = enemyStore;
+        this.pitsElem.push(myStore);
 
         // Changing grid columns to fit selected number of pits
         smallBotGrid.style.setProperty('grid-template-columns', 'repeat(' + this.pitsNum + ', 1fr)');
@@ -100,20 +108,49 @@ class Board {
         let startingSeeds = this.pits[1];
         for (let i = 1; i < this.pitsNum + 1; i++) {
             for (let j = 0; j < startingSeeds; j++) {
-                this.createSeed(this.pitsElem[i]);
+                Board.createSeed(this.pitsElem[i]);
             }
         }
 
         for (let i = 1 + this.pitsNum; i < 1 + this.pitsNum * 2; i++) {
             for (let j = 0; j < startingSeeds; j++) {
-                this.createSeed(this.pitsElem[i]);
+                Board.createSeed(this.pitsElem[i]);
             }
         }
     }
 
+    clickPit(event) {
+        let pit_i = event.target;
+        console.log(pit_i)
+        if (pit_i.className == seedClass) pit_i = pit_i.parentNode;
+        
+        let i = 1;
+        console.log("_"+pitsNum);
+        for (; i < this.pitsNum + 1; i++) {
+            if (pit_i !== this.pitsElem[i]) {
+                console.log("continued");
+                continue;
+            }
+            else {
+                console.log("was equal");
+                break;
+            }
+        }
+        if (i == 0 || i == this.pitsNum + 1) return -1; // Stores are not clickable!
+        let seeds_num = pit_i.children;
+        i++;
+        for (let j = seeds_num; seeds_num > 0; seeds_num--) {
+            moveSeedTo(pit_i.firstChild, this.pitsElem[i]);
+            i = (i + 1) % (this.pitsNum * 2 + 2);
+        }
+
+
+    }
+
+
     // Creates a seed div randomly positions it and returns the div element
     // REMINDER: add rotation
-    createSeed(parent) {
+    static createSeed(parent) {
         let seed = document.createElement("div");
         seed.className = seedClass;
         let style = seed.style;
@@ -122,13 +159,12 @@ class Board {
         // Random Color
         style.backgroundColor = "rgb(" + Math.floor(Math.random() * 255) + " " + Math.floor(Math.random() * 255) + " " + Math.floor(Math.random() * 255) + ")";
         style.position = "absolute";
-        Board.randomSeedPos(seed, parent);
-        parent.appendChild(seed);
+        Board.moveSeedTo(seed, parent);
         return seed;
     }
 
-    // positions a seed in a random position
-    static randomSeedPos(seed, parent) {
+    // positions a seed in parent pit in a random position
+    static moveSeedTo(seed, parent) {
         const offset = 25;
         // Generating 2 random offsets that range from -offset to offset
         let randomOffset1 = Math.floor(Math.random() * (offset - (-offset) + 1)) + (-offset);
@@ -142,6 +178,10 @@ class Board {
         // converting px to % and centering seed in the middle of parent (with a random offset)
         seed.style.left = (50 - (width / rectparent.width) * 100 / 2) + randomOffset1 + "%";
         seed.style.top = (50 - (height / rectparent.height) * 100 / 2) + randomOffset2 + "%";
+        parent.appendChild(seed);
     }
+
+
+
 }
 
