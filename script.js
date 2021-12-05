@@ -9,6 +9,8 @@ const openPopButton = document.querySelectorAll('[data-pop-target]');
 const closePopButton = document.querySelectorAll('[data-close-button]');
 const overlay = document.getElementById('overlay');
 
+parseConfigs() // To have a predefined board
+
 // remove pop up
 function openPop(pop) {
 	if (pop == null) return;
@@ -50,7 +52,6 @@ closePopButton.forEach(button => {
 // Submit button on configurations
 configForm.children.configFormButton.addEventListener('click', parseConfigs, false);
 
-
 function parseConfigs() {
 	let pitsNum = parseInt(configForm.children.holesNum.value);
 	let seedsNum = parseInt(configForm.children.seedsNum.value);
@@ -59,26 +60,24 @@ function parseConfigs() {
 		return;
 	}
 	// If within expected range
-	else if (board === undefined) {
-		// If no board was previously created
-		if (seedsNum >= minSeeds && seedsNum <= maxSeeds && pitsNum >= minPits && pitsNum <= maxPits) {
-			board = new Board(pitsNum, seedsNum, document.getElementById("board"));
-			
-			// Disabling inputs and selects to make sure user doesnt change them mid game
-			var nodes = configForm.childNodes;
-			for (var i = 0; i < nodes.length; i++) {
-				nodes[i].disabled = true;
-			}
+	else if (seedsNum >= minSeeds && seedsNum <= maxSeeds && pitsNum >= minPits && pitsNum <= maxPits) {
+		let boardElement = document.getElementById("board");
+		if (boardElement !== undefined) boardElement.textContent = '';
+		board = new Board(pitsNum, seedsNum, boardElement);
+		board.initBoard();
 
-			board.initBoard();
-			
-		}
-		else{
-			window.alert("Input invalido são aceites entre " + minPits + " a " + maxPits +
-				" cavidades por linha e entre " + minSeeds + " a " + maxPits + " sementes por cavidade");
-		}
 	}
-
+	else {
+		window.alert("Input invalido são aceites entre " + minPits + " a " + maxPits +
+			" cavidades por linha e entre " + minSeeds + " a " + maxPits + " sementes por cavidade");
+	}
 	closePop(configPop);
 
 }
+
+// USED FOR TESTING when removing this remember to also remove top pits event listeners
+function changeTurn(){
+	board.turn = board.turn ? false : true;
+	console.log("turn="+board.turn);
+}
+document.getElementById("changeTurn").addEventListener("click",changeTurn,false)

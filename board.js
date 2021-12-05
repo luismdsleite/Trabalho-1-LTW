@@ -16,40 +16,40 @@ let board;
 and the capture pit in the pitsNum position is my store this way we can use % (mod) operator to
 distribute the seeds*/
 class Board {
-    pitsNum; // Number of pits per row (Stores are not counted here)
-    pits; // Number of seeds each pit has (including both stores)
-    pitsElem; // all pits and stores divs
-    boardID; // ID where board will be constructed
-    boolMyTurn; // Bool indicating whose turn it is
 
     constructor(pitsNum, seedsNum, boardID) {
-        this.pitsNum = pitsNum;
-        // Array will hold Enemy Store | capture pits | My Store
-        this.pits = new Array(1 + pitsNum * 2 + 1);
-        for (let i = 1; i < pitsNum * 2; i++) {
-            this.pits[i] = seedsNum;
-        }
+        this.pitsNum = pitsNum; // Number of pits per row (Stores are not counted here)
+        this.pits = Array(this.pitsNum*2 + 2) // Number of seeds each pit has (including both stores)
+        this.boardID = boardID; // ID where board will be constructed
+        this.pitsElem = Array(this.pitsNum*2 + 2); // Array will hold My Store | My Capture Pits | My Store | Enemy Capture Pits divs
+        this.turn = true; // Bool indicating whose turn it is
+        this.myStorePos = 0;
+        this.enemyStorePos = pitsNum + 1;
+
         // Settings stores to both have 0 seeds
-        this.pits[0] = 0;
-        this.pits[pitsNum] = 0;
-        this.boardID = boardID;
-        this.pitsElem = [];
+        this.pits[this.myStorePos] = 0;
+        this.pits[this.enemyStorePos] = 0;
+
+        for (let i = 1; i < this.pits.length; i++) {
+            if (i == this.myStorePos || i == this.enemyStorePos)
+                this.pits[i] = 0;
+            else
+                this.pits[i] = seedsNum;
+        }
+
     }
 
     initBoard() {
         this.initHoles();
         this.initSeeds();
-        console.log("pits = " + this.pitsNum);
-        for (let i = 1; i < this.pitsNum+1; i++) {
-            console.log(this.pitsElem[i]);
-            this.pitsElem[i].addEventListener("click", this.clickPit, false);
+        for (let i = 1; i < this.pitsNum * 2 + 2; i++) {
+            if (i == board.myStorePos || i == board.enemyStorePos) continue;
+            this.pitsElem[i].addEventListener("click", clickPit, false);
         }
     }
 
     // Generates all stores and pits
     initHoles() {
-        this.pitsElem = Array(1 + this.pitsNum + 1);
-
         // Creating my store
         let myStore = document.createElement("div");
         myStore.classList = myStoreClass;
@@ -82,18 +82,15 @@ class Board {
             smallBotGrid.appendChild(div);
             this.pitsElem[1 + i] = div;
         }
-
         // Creating enemy capture pits
         for (let i = 0; i < board.pitsNum; i++) {
             let div = document.createElement("div");
             div.classList = smallPitsClass;
-            smallTopGrid.appendChild(div);
-            this.pitsElem[1 + this.pitsNum + i] = div;
+            smallTopGrid.prepend(div);
+            this.pitsElem[2 + this.pitsNum + i] = div;
         }
-
-        this.pitsElem[0] = enemyStore;
-        this.pitsElem.push(myStore);
-
+        this.pitsElem[this.myStorePos] = myStore;
+        this.pitsElem[this.enemyStorePos] = enemyStore;
         // Changing grid columns to fit selected number of pits
         smallBotGrid.style.setProperty('grid-template-columns', 'repeat(' + this.pitsNum + ', 1fr)');
         smallTopGrid.style.setProperty('grid-template-columns', 'repeat(' + this.pitsNum + ', 1fr)');
@@ -105,51 +102,14 @@ class Board {
             return;
         }
 
-        let startingSeeds = this.pits[1];
-        for (let i = 1; i < this.pitsNum + 1; i++) {
-            for (let j = 0; j < startingSeeds; j++) {
-                Board.createSeed(this.pitsElem[i]);
-            }
-        }
-
-        for (let i = 1 + this.pitsNum; i < 1 + this.pitsNum * 2; i++) {
-            for (let j = 0; j < startingSeeds; j++) {
+        for (let i = 0; i < this.pits.length; i++) {
+            for (let j = 0; j < this.pits[i]; j++) {
                 Board.createSeed(this.pitsElem[i]);
             }
         }
     }
-
-    clickPit(event) {
-        let pit_i = event.target;
-        console.log(pit_i)
-        if (pit_i.className == seedClass) pit_i = pit_i.parentNode;
-        
-        let i = 1;
-        console.log("_"+pitsNum);
-        for (; i < this.pitsNum + 1; i++) {
-            if (pit_i !== this.pitsElem[i]) {
-                console.log("continued");
-                continue;
-            }
-            else {
-                console.log("was equal");
-                break;
-            }
-        }
-        if (i == 0 || i == this.pitsNum + 1) return -1; // Stores are not clickable!
-        let seeds_num = pit_i.children;
-        i++;
-        for (let j = seeds_num; seeds_num > 0; seeds_num--) {
-            moveSeedTo(pit_i.firstChild, this.pitsElem[i]);
-            i = (i + 1) % (this.pitsNum * 2 + 2);
-        }
-
-
-    }
-
 
     // Creates a seed div randomly positions it and returns the div element
-    // REMINDER: add rotation
     static createSeed(parent) {
         let seed = document.createElement("div");
         seed.className = seedClass;
