@@ -2,9 +2,14 @@
 const PitsGridClass = "smallHolesGrid";
 const topPitsGridClass = "smallHolesTop";
 const botPitsGridClass = "smallHolesBottom";
-const smallPitsClass = "hole smallHole";
-const enemyStoreClass = "hole bigHole bigHoleRight";
-const myStoreClass = "hole bigHole bigHoleLeft";
+const pitTopClass = "hole smallHoleTop";
+const pitBottomClass = "hole smallHoleBottom";
+const enemyStoreClass = "hole bigHole bigHoleLeft";
+const myStoreClass = "hole bigHole bigHoleRight";
+const storeLeftParent = "bigHoleLeftParent"
+const storeRightParent = "bigHoleRightParent"
+const pitTopParent = "smallHoleTopParent"
+const pitBottomParent = "smallHoleBottomParent"
 const seedClass = "seed"
 // seed width and height in viewport units
 const seedWidth = 2;
@@ -21,10 +26,10 @@ class Board {
         this.pitsNum = pitsNum; // Number of pits per row (Stores are not counted here)
         this.pits = Array(this.pitsNum*2 + 2) // Number of seeds each pit has (including both stores)
         this.boardID = boardID; // ID where board will be constructed
-        this.pitsElem = Array(this.pitsNum*2 + 2); // Array will hold My Store | My Capture Pits | My Store | Enemy Capture Pits divs
+        this.pitsElem = Array(this.pitsNum*2 + 2); // Array that will hold the div that contains the pit and the value
         this.turn = true; // Bool indicating whose turn it is
-        this.myStorePos = 0;
-        this.enemyStorePos = pitsNum + 1;
+        this.myStorePos = pitsNum + 1;
+        this.enemyStorePos = 0;
 
         // Settings stores to both have 0 seeds
         this.pits[this.myStorePos] = 0;
@@ -44,26 +49,36 @@ class Board {
         this.initSeeds();
         for (let i = 1; i < this.pitsNum * 2 + 2; i++) {
             if (i == board.myStorePos || i == board.enemyStorePos) continue;
-            this.pitsElem[i].addEventListener("click", clickPit, false);
+            this.pitsElem[i].children[0].addEventListener("click", clickPit, false);
+
         }
     }
 
     // Generates all stores and pits
     initHoles() {
-        // Creating my store
-        let myStore = document.createElement("div");
-        myStore.classList = myStoreClass;
-        this.boardID.appendChild(myStore);
+        // Creating enemy store
+        let enemyStoreParent = document.createElement("div");
+        enemyStoreParent.classList = storeLeftParent;
+        let enemyStore = document.createElement("div");
+        enemyStore.classList = enemyStoreClass;
+        enemyStoreParent.textContent ="0";
+        enemyStoreParent.appendChild(enemyStore);
+        this.boardID.appendChild(enemyStoreParent);
 
         // Creating a grid between my store and enemy store
         let smallPitsGrid = document.createElement("div");
         smallPitsGrid.classList = PitsGridClass;
         this.boardID.appendChild(smallPitsGrid);
 
-        // Creating Enemy store
-        let enemyStore = document.createElement("div");
-        enemyStore.classList = enemyStoreClass;
-        this.boardID.appendChild(enemyStore);
+        // Creating my store
+        let myStoreParent = document.createElement("div");
+        myStoreParent.classList = storeRightParent;
+        let myStore = document.createElement("div");
+        myStore.classList = myStoreClass;
+        myStoreParent.textContent ="0";
+        myStoreParent.appendChild(myStore);
+        this.boardID.appendChild(myStoreParent);
+
 
         // Top grid that will hold enemy capture pits
         let smallTopGrid = document.createElement("div");
@@ -77,20 +92,28 @@ class Board {
 
         // Creating my capture pits
         for (let i = 0; i < board.pitsNum; i++) {
+            let divParent = document.createElement("div");
+            divParent.className = pitBottomParent;
             let div = document.createElement("div");
-            div.classList = smallPitsClass;
-            smallBotGrid.appendChild(div);
-            this.pitsElem[1 + i] = div;
+            div.classList = pitTopClass;
+            divParent.textContent =this.pits[1+i];
+            smallBotGrid.appendChild(divParent);
+            divParent.appendChild(div);
+            this.pitsElem[1 + i] = divParent;
         }
         // Creating enemy capture pits
         for (let i = 0; i < board.pitsNum; i++) {
+            let divParent = document.createElement("div");
+            divParent.className = pitTopParent;
             let div = document.createElement("div");
-            div.classList = smallPitsClass;
-            smallTopGrid.prepend(div);
-            this.pitsElem[2 + this.pitsNum + i] = div;
+            div.classList = pitBottomClass;
+            divParent.textContent =this.pits[2+this.pitsNum+i];
+            smallTopGrid.prepend(divParent);
+            divParent.appendChild(div);
+            this.pitsElem[2 + this.pitsNum + i] = divParent;
         }
-        this.pitsElem[this.myStorePos] = myStore;
-        this.pitsElem[this.enemyStorePos] = enemyStore;
+        this.pitsElem[this.myStorePos] = myStoreParent;
+        this.pitsElem[this.enemyStorePos] = enemyStoreParent;
         // Changing grid columns to fit selected number of pits
         smallBotGrid.style.setProperty('grid-template-columns', 'repeat(' + this.pitsNum + ', 1fr)');
         smallTopGrid.style.setProperty('grid-template-columns', 'repeat(' + this.pitsNum + ', 1fr)');
@@ -104,7 +127,7 @@ class Board {
 
         for (let i = 0; i < this.pits.length; i++) {
             for (let j = 0; j < this.pits[i]; j++) {
-                Board.createSeed(this.pitsElem[i]);
+                Board.createSeed(this.pitsElem[i].children[0]);
             }
         }
     }

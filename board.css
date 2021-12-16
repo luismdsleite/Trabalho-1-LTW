@@ -3,9 +3,10 @@ This file contains all of the board related propertied
 (things related to style like shadows, etc are still stored on styles.css)
 */
 
-.hole{
-  position: relative;
+.hole {
+  position: absolute;
 }
+
 .holesGrid {
   margin-top: 5vh;
   height: 40vh;
@@ -34,33 +35,68 @@ This file contains all of the board related propertied
   width: 100%;
   align-items: center;
   justify-items: center;
-  grid-template-columns: repeat(6, 1fr);
 }
 
+.smallHoleTopParent, .smallHoleBottomParent {
+  height: 100%;
+  width: 100%;
+  position: relative;
+  display: grid;
+}
 
+.smallHoleTopParent{
+  align-items: flex-end;
+}
+.smallHoleBottomParent{
+  align-items: flex-start;
+}
+
+.bigHoleLeftParent, .bigHoleRightParent {
+  height: 100%;
+  width: 100%;
+  position: relative;
+  display: grid;
+}
+
+.bigHoleLeftParent {
+  align-items: flex-end;
+}
+
+.bigHoleRightParent {
+  align-items: flex-start;
+}
 
 .bigHole {
-  align-self: center;
   width: 50%;
-  height: 80%;
+  height: 85%;
   border-radius: 5em;
 }
 
 .bigHoleLeft {
-  margin-bottom: 10%;
-  margin-top: 30%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -55%);
 }
 
 .bigHoleRight {
-  margin-top: 10%;
-  margin-bottom: 30%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -45%);
 }
 
-
-.smallHole {
+.smallHoleTop, .smallHoleBottom {
   height: 70%;
   width: 70%;
   border-radius: 50%;
+  top: 50%;
+  left: 50%;
+}
+.smallHoleTop{
+  transform: translate(-50%, -45%);
+}
+
+.smallHoleBottom{
+  transform: translate(-50%, -55%);
 }
 
 .seed {

@@ -16,6 +16,7 @@ h1 {
 .hole {
     background-color: rgba(194, 125, 52, 0.65);
     box-shadow: inset 10px 10px 10px rgba(0, 0, 0, 0.5);
+
 }
 
 
@@ -54,4 +55,11 @@ form {
 .pop_title {
     font-size: 1.25rem;
     font-weight: bold;
+}
+
+.bigHoleLeftParent, .bigHoleRightParent, .smallHoleTopParent, .smallHoleBottomParent {
+    font-size: 3vh;
+    color: rgb(119, 83, 42);
+    font-weight: bolder;
+    text-align: center;
 }
