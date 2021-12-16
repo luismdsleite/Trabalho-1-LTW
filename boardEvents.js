@@ -1,3 +1,4 @@
+// Js that will hold all of the board events, must be called after board.js
 
 function clickPit(event) {
 
@@ -24,7 +25,7 @@ function clickPit(event) {
         // If i reach a enemy store and its my turn or vice-versa dont place a seed in it
         if (!((i == board.enemyStorePos && board.turn) || (i == board.myStorePos && !board.turn))) {
             Board.moveSeedTo(pit_i.firstChild, board.pitsElem[i].children[0]);
-            let pitValue = board.pitsElem[i].childNodes[0]; 
+            let pitValue = board.pitsElem[i].childNodes[0];
             pitValue.nodeValue = parseInt(pitValue.nodeValue) + 1;
             seeds_num--;
         }

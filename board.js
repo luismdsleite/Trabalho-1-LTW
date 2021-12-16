@@ -6,11 +6,11 @@ const pitTopClass = "hole smallHoleTop";
 const pitBottomClass = "hole smallHoleBottom";
 const enemyStoreClass = "hole bigHole bigHoleLeft";
 const myStoreClass = "hole bigHole bigHoleRight";
-const storeLeftParent = "bigHoleLeftParent"
-const storeRightParent = "bigHoleRightParent"
-const pitTopParent = "smallHoleTopParent"
-const pitBottomParent = "smallHoleBottomParent"
-const seedClass = "seed"
+const storeLeftParent = "bigHoleLeftParent";
+const storeRightParent = "bigHoleRightParent";
+const pitTopParent = "smallHoleTopParent";
+const pitBottomParent = "smallHoleBottomParent";
+const seedClass = "seed";
 // seed width and height in viewport units
 const seedWidth = 2;
 const seedHeight = 3;
@@ -24,7 +24,7 @@ class Board {
 
     constructor(pitsNum, seedsNum, boardID) {
         this.pitsNum = pitsNum; // Number of pits per row (Stores are not counted here)
-        this.pits = Array(this.pitsNum*2 + 2) // Number of seeds each pit has (including both stores)
+        this.pits = Array(this.pitsNum*2 + 2); // Number of seeds each pit has (including both stores)
         this.boardID = boardID; // ID where board will be constructed
         this.pitsElem = Array(this.pitsNum*2 + 2); // Array that will hold the div that contains the pit and the value
         this.turn = true; // Bool indicating whose turn it is
@@ -44,13 +44,12 @@ class Board {
 
     }
 
-    initBoard() {
+    initBoard(clickEvent) {
         this.initHoles();
         this.initSeeds();
         for (let i = 1; i < this.pitsNum * 2 + 2; i++) {
             if (i == board.myStorePos || i == board.enemyStorePos) continue;
-            this.pitsElem[i].children[0].addEventListener("click", clickPit, false);
-
+            this.pitsElem[i].children[0].addEventListener("click", clickEvent, false);
         }
     }
 
@@ -65,7 +64,7 @@ class Board {
         enemyStoreParent.appendChild(enemyStore);
         this.boardID.appendChild(enemyStoreParent);
 
-        // Creating a grid between my store and enemy store
+        // Creating a grid between enemy store and my store
         let smallPitsGrid = document.createElement("div");
         smallPitsGrid.classList = PitsGridClass;
         this.boardID.appendChild(smallPitsGrid);

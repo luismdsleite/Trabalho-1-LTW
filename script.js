@@ -64,7 +64,7 @@ function parseConfigs() {
 		let boardElement = document.getElementById("board");
 		if (boardElement !== undefined) boardElement.textContent = '';
 		board = new Board(pitsNum, seedsNum, boardElement);
-		board.initBoard();
+		board.initBoard(clickPit);
 
 	}
 	else {
