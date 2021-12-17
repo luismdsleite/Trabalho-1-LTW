@@ -18,6 +18,7 @@ function clickPit(event) {
 
     // Settings seed counter to 0
     pit_i.parentNode.childNodes[0].nodeValue = 0;
+    board.pits[i] = 0;
 
     let seeds_num = pit_i.children.length;
     i = (i + 1) % (board.pitsNum * 2 + 2);
@@ -28,6 +29,7 @@ function clickPit(event) {
             let pitValue = board.pitsElem[i].childNodes[0];
             pitValue.nodeValue = parseInt(pitValue.nodeValue) + 1;
             seeds_num--;
+            board.pits[i] += 1;
         }
         i = (i + 1) % (board.pitsNum * 2 + 2);
     }
