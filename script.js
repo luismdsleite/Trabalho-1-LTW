@@ -74,10 +74,3 @@ function parseConfigs() {
 	closePop(configPop);
 
 }
-
-// USED FOR TESTING when removing this remember to also remove top pits event listeners
-function changeTurn(){
-	board.turn = board.turn ? false : true;
-	console.log("turn="+board.turn + " " + board.pits);
-}
-document.getElementById("changeTurn").addEventListener("click",changeTurn,false)

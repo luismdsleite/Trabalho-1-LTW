@@ -24,9 +24,9 @@ class Board {
 
     constructor(pitsNum, seedsNum, boardID) {
         this.pitsNum = pitsNum; // Number of pits per row (Stores are not counted here)
-        this.pits = Array(this.pitsNum*2 + 2); // Number of seeds each pit has (including both stores)
+        this.pits = Array(this.pitsNum * 2 + 2); // Number of seeds each pit has (including both stores)
         this.boardID = boardID; // ID where board will be constructed
-        this.pitsElem = Array(this.pitsNum*2 + 2); // Array that will hold the div that contains the pit and the value
+        this.pitsElem = Array(this.pitsNum * 2 + 2); // Array that will hold the div that contains the pit and the value
         this.turn = true; // Bool indicating whose turn it is
         this.myStorePos = pitsNum + 1;
         this.enemyStorePos = 0;
@@ -41,7 +41,6 @@ class Board {
             else
                 this.pits[i] = seedsNum;
         }
-
     }
 
     initBoard(clickEvent) {
@@ -60,7 +59,7 @@ class Board {
         enemyStoreParent.classList = storeLeftParent;
         let enemyStore = document.createElement("div");
         enemyStore.classList = enemyStoreClass;
-        enemyStoreParent.textContent ="0";
+        enemyStoreParent.textContent = "0";
         enemyStoreParent.appendChild(enemyStore);
         this.boardID.appendChild(enemyStoreParent);
 
@@ -74,7 +73,7 @@ class Board {
         myStoreParent.classList = storeRightParent;
         let myStore = document.createElement("div");
         myStore.classList = myStoreClass;
-        myStoreParent.textContent ="0";
+        myStoreParent.textContent = "0";
         myStoreParent.appendChild(myStore);
         this.boardID.appendChild(myStoreParent);
 
@@ -95,7 +94,7 @@ class Board {
             divParent.className = pitBottomParent;
             let div = document.createElement("div");
             div.classList = pitTopClass;
-            divParent.textContent =this.pits[1+i];
+            divParent.textContent = this.pits[1 + i];
             smallBotGrid.appendChild(divParent);
             divParent.appendChild(div);
             this.pitsElem[1 + i] = divParent;
@@ -106,7 +105,7 @@ class Board {
             divParent.className = pitTopParent;
             let div = document.createElement("div");
             div.classList = pitBottomClass;
-            divParent.textContent =this.pits[2+this.pitsNum+i];
+            divParent.textContent = this.pits[2 + this.pitsNum + i];
             smallTopGrid.prepend(divParent);
             divParent.appendChild(div);
             this.pitsElem[2 + this.pitsNum + i] = divParent;
@@ -129,6 +128,85 @@ class Board {
                 Board.createSeed(this.pitsElem[i].children[0]);
             }
         }
+    }
+
+    changeTurn() {
+        board.turn = board.turn ? false : true;
+        console.log("turn=" + board.turn + " " + board.pits);
+    }
+
+    // Receives last played seed position and enforces the rules based on the position
+    endTurn(i) {
+
+        let sumMyPits = this.pits.slice(1, this.pitsNum + 1).reduce((a, b) => a + b, 0);
+        let sumEnemyPits = this.pits.slice(this.pitsNum + 2, this.pitsNum * 2 + 3).reduce((a, b) => a + b, 0);
+        if (sumMyPits == 0 || sumEnemyPits == 0) {
+            this.endGame()
+        }
+        // Landed in an empty pit when it was my turn 
+        if (this.pits[i] == 1
+            &&
+            (
+                (i > 0 && i < this.pitsNum + 1 && board.turn)
+                ||
+                (i > this.pitsNum + 1 && i < this.pitsNum * 2 + 2 && !board.turn)
+            )
+        ) {
+            return 2;
+        }
+        // it landed on my pit and it was his turn, or vice versa, change turn
+        else if ((i > 0 && i < this.pitsNum + 1)
+            || (i > this.pitsNum + 1 && i < this.pitsNum * 2 + 2)) {
+            this.changeTurn();
+            return 1;
+        }
+        return 0;
+    }
+
+    endGame() {
+        if (this.turn) {
+            let enemyStore = this.pitsElem[this.enemyStorePos].children[0];
+
+            for (let i = this.myStorePos + 1; i < this.pitsNum * 2 + 2; i++) {
+                let seeds = this.pitsElem[i].children[0];
+                let seedsNum = seeds.children.length;
+
+                // Moving seeds to enemy Store
+                for (let j = 0; j < seedsNum; j++)
+                    Board.moveSeedTo(seeds.firstChild, enemyStore);
+
+                // Updating pit Value text and Array
+                this.pits[this.enemyStorePos] += this.pits[i];
+                this.pits[i] = 0;
+
+                this.pitsElem[this.enemyStorePos].firstChild.nodeValue = this.pits[this.enemyStorePos];
+                this.pitsElem[i].firstChild.nodeValue = this.pits[i];
+            }
+        } else {
+            let myStore = this.pitsElem[this.myStorePos].children[0];
+            for (let i = 1; i < this.pitsNum + 1; i++) {
+                let seeds = this.pitsElem[i].children[0];
+                let seedsNum = seeds.children.length;
+
+                // Moving seeds to my Store
+                for (let j = 0; j < seedsNum; j++)
+                    Board.moveSeedTo(seeds.firstChild, myStore);
+
+                // Updating pit Value text and Array
+                this.pits[this.myStorePos] += this.pits[i];
+                this.pits[i] = 0;
+
+                this.pitsElem[this.myStorePos].firstChild.nodeValue = this.pits[this.myStorePos];
+                this.pitsElem[i].firstChild.nodeValue = this.pits[i];
+            }
+        }
+
+        let msg = "Draw";
+        if (this.pits[this.enemyStorePos] < this.pits[this.myStorePos])
+            msg = "You Won";
+        else if (this.pits[this.enemyStorePos] > this.pits[this.myStorePos])
+            msg = "You Lost";
+        console.log(msg);
     }
 
     // Creates a seed div randomly positions it and returns the div element
