@@ -35,7 +35,7 @@ function clickPit(event) {
             seeds_num--;
         }
     }
-
     // Following rules based on the place of the last seed
     board.endTurn(i);
+    board.highlightPits();
 }

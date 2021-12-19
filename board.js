@@ -15,6 +15,11 @@ const seedClass = "seed";
 const seedWidth = 2;
 const seedHeight = 3;
 
+// Used to hightlight pits
+const pitShadow = "inset 10px 10px 10px rgba(0, 0, 0, 0.5)";
+const pitHighlightBlue = "0 0 2vh blue";
+const pitHighlightRed = "0 0 2vh red";
+
 let board;
 
 /* Here we will assume the capture pit in the 0th position is the enemy store
@@ -30,6 +35,7 @@ class Board {
         this.turn = true; // Bool indicating whose turn it is
         this.myStorePos = pitsNum + 1;
         this.enemyStorePos = 0;
+        this.mode;
 
         // Settings stores to both have 0 seeds
         this.pits[this.myStorePos] = 0;
@@ -46,6 +52,7 @@ class Board {
     initBoard(clickEvent, mode) {
         this.initHoles();
         this.initSeeds();
+        this.mode = mode;
         if (mode == 'local')
             for (let i = 1; i < this.pitsNum * 2 + 2; i++) {
                 if (i == board.myStorePos || i == board.enemyStorePos) continue;
@@ -58,6 +65,7 @@ class Board {
             console.error("No valid mode selected, InitBoard()");
             return -1;
         }
+        this.highlightPits();
         return 0;
     }
 
@@ -211,6 +219,40 @@ class Board {
         for (let i = 0; i < n; i++)
             Board.moveSeedTo(fromPit.firstChild, toPit);
         toValue.nodeValue = this.pits[to_i];
+    }
+
+    // highlights playable pits
+    highlightPits() {
+        if (this.turn) {
+            // Highliting my pits
+            for (let i = 1; i < this.myStorePos; i++) {
+                if (this.pits[i] != 0) {
+                    this.pitsElem[i].children[0].style.boxShadow = pitShadow + "," + pitHighlightBlue;
+                }
+                else
+                    this.pitsElem[i].children[0].style.boxShadow = pitShadow;
+            }
+            // Removing enemy pits highlight
+            if (this.mode == 'local')
+                for (let i = this.myStorePos + 1; i < this.pitsNum * 2 + 2; i++)
+                    this.pitsElem[i].children[0].style.boxShadow = pitShadow;
+        }
+        else {
+            // removing my pits highlight
+            for (let i = 1; i < this.myStorePos; i++) {
+                this.pitsElem[i].children[0].style.boxShadow = pitShadow;
+            }
+            // Highliting enemy pits
+            if (this.mode == 'local') {
+                for (let i = this.myStorePos + 1; i < this.pitsNum * 2 + 2; i++) {
+                    if (this.pits[i] != 0) {
+                        this.pitsElem[i].children[0].style.boxShadow = pitShadow + "," + pitHighlightRed;
+                    }
+                    else
+                        this.pitsElem[i].children[0].style.boxShadow = pitShadow;
+                }
+            }
+        }
     }
 
     // Creates a seed div randomly positions it and returns the div element
