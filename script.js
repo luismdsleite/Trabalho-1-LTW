@@ -53,19 +53,27 @@ closePopButton.forEach(button => {
 configForm.children.configFormButton.addEventListener('click', parseConfigs, false);
 
 function parseConfigs() {
-	let pitsNum = parseInt(configForm.children.holesNum.value);
-	let seedsNum = parseInt(configForm.children.seedsNum.value);
+	let configs = configForm.children;
+	let pitsNum = parseInt(configs.holesNum.value);
+	let seedsNum = parseInt(configs.seedsNum.value);
+
 	// If not all values were filled
-	if (seedsNum == undefined || pitsNum == undefined) {
+	if (seedsNum == undefined || pitsNum == undefined)
 		return;
-	}
+
 	// If within expected range
 	else if (seedsNum >= minSeeds && seedsNum <= maxSeeds && pitsNum >= minPits && pitsNum <= maxPits) {
 		let boardElement = document.getElementById("board");
 		if (boardElement !== undefined) boardElement.textContent = '';
 		board = new Board(pitsNum, seedsNum, boardElement);
-		board.initBoard(clickPit);
-
+		// choosing who plays first
+		if (configs.firstMove.selectedIndex != 0) board.changeTurn();
+		// choosing mode
+		if (configs.opponent.selectedIndex == 1) board.initBoard(clickPit, 'local');
+		else if (configs.opponent.selectedIndex == 0) board.initBoard(clickPit, 'multiplayer');
+		else {
+			board.initBoard(clickPit, 'ai');
+		}
 	}
 	else {
 		window.alert("Input invalido são aceites entre " + minPits + " a " + maxPits +

@@ -58,8 +58,9 @@
           <label for="seedsNum">Número de sementes por cavidade:</label>
           <input type="number" id="seedsNum" name="seeds_num_name" min="2" max="14" value="6"><br>
           <label>Adversário:</label>
-          <select>
-            <option>Jogador</option>
+          <select id="opponent">
+            <option>Jogador (Multiplayer)</option>
+            <option selected>Jogador (Local)</option>
             <optgroup label=Computador(IA)>
               <option>Dificuldade I</option>
               <option>Dificuldade II</option>
@@ -67,8 +68,8 @@
             </optgroup>
           </select><br>
           <label>Primeiro a jogar:</label>
-          <select>
-            <option>Começar a jogar</option>
+          <select id="firstMove">
+            <option selected>Começar a jogar</option>
             <option>Dar a vez ao adversário</option>
           </select>
           <button type="button" id="configFormButton">Submit</button>

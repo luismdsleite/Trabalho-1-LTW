@@ -43,13 +43,22 @@ class Board {
         }
     }
 
-    initBoard(clickEvent) {
+    initBoard(clickEvent, mode) {
         this.initHoles();
         this.initSeeds();
-        for (let i = 1; i < this.pitsNum * 2 + 2; i++) {
-            if (i == board.myStorePos || i == board.enemyStorePos) continue;
-            this.pitsElem[i].children[0].addEventListener("click", clickEvent, false);
+        if (mode == 'local')
+            for (let i = 1; i < this.pitsNum * 2 + 2; i++) {
+                if (i == board.myStorePos || i == board.enemyStorePos) continue;
+                this.pitsElem[i].children[0].addEventListener("click", clickEvent, false);
+            }
+        else if (mode == 'multiplayer' || mode == 'ai')
+            for (let i = 1; i < this.myStorePos; i++)
+                this.pitsElem[i].children[0].addEventListener("click", clickEvent, false);
+        else {
+            console.error("No valid mode selected, InitBoard()");
+            return -1;
         }
+        return 0;
     }
 
     // Generates all stores and pits
@@ -132,73 +141,49 @@ class Board {
 
     changeTurn() {
         board.turn = board.turn ? false : true;
-        console.log("turn=" + board.turn + " " + board.pits);
     }
 
     // Receives last played seed position and enforces the rules based on the position
     endTurn(i) {
-
-        let sumMyPits = this.pits.slice(1, this.pitsNum + 1).reduce((a, b) => a + b, 0);
-        let sumEnemyPits = this.pits.slice(this.pitsNum + 2, this.pitsNum * 2 + 3).reduce((a, b) => a + b, 0);
-        if (sumMyPits == 0 || sumEnemyPits == 0) {
-            this.endGame()
-        }
-        // Landed in an empty pit when it was my turn 
-        if (this.pits[i] == 1
-            &&
-            (
-                (i > 0 && i < this.pitsNum + 1 && board.turn)
-                ||
-                (i > this.pitsNum + 1 && i < this.pitsNum * 2 + 2 && !board.turn)
-            )
+        if (this.checkIfEnded())
+            this.endGame();
+        // Landed in my empty pit when it was my turn, then collect seeds from my and the opposing pit, and play again
+        else if (this.pits[i] == 1 &&
+            ((i > 0 && i < this.myStorePos && board.turn) || (i > this.myStorePos && i < this.pitsNum * 2 + 2 && !board.turn))
         ) {
+            let storePos = this.turn ? this.myStorePos : this.enemyStorePos;
+            this.moveNSeeds(i, storePos, 1);
+            // Opposite pit position
+            let opp_i = this.pitsNum * 2 + 2 - i;
+            this.moveNSeeds(opp_i, storePos, this.pits[opp_i]);
+
+            if (this.checkIfEnded())
+                this.endGame();
+            this.changeTurn();
             return 2;
         }
-        // it landed on my pit and it was his turn, or vice versa, change turn
-        else if ((i > 0 && i < this.pitsNum + 1)
-            || (i > this.pitsNum + 1 && i < this.pitsNum * 2 + 2)) {
-            this.changeTurn();
-            return 1;
-        }
-        return 0;
+        if (i == this.myStorePos || i == this.enemyStorePos)
+            return 3;
+        this.changeTurn();
+        return 1;
+    }
+
+    checkIfEnded() {
+        let sumMyPits = this.pits.slice(1, this.myStorePos).reduce((a, b) => a + b, 0);
+        let sumEnemyPits = this.pits.slice(this.myStorePos + 1, this.pitsNum * 2 + 2).reduce((a, b) => a + b, 0);
+
+        if (sumMyPits == 0 || sumEnemyPits == 0)
+            return true;
+        return false;
     }
 
     endGame() {
         if (this.turn) {
-            let enemyStore = this.pitsElem[this.enemyStorePos].children[0];
-
-            for (let i = this.myStorePos + 1; i < this.pitsNum * 2 + 2; i++) {
-                let seeds = this.pitsElem[i].children[0];
-                let seedsNum = seeds.children.length;
-
-                // Moving seeds to enemy Store
-                for (let j = 0; j < seedsNum; j++)
-                    Board.moveSeedTo(seeds.firstChild, enemyStore);
-
-                // Updating pit Value text and Array
-                this.pits[this.enemyStorePos] += this.pits[i];
-                this.pits[i] = 0;
-
-                this.pitsElem[this.enemyStorePos].firstChild.nodeValue = this.pits[this.enemyStorePos];
-                this.pitsElem[i].firstChild.nodeValue = this.pits[i];
-            }
+            for (let i = this.myStorePos + 1; i < this.pitsNum * 2 + 2; i++)
+                this.moveNSeeds(i, this.enemyStorePos, this.pits[i]);
         } else {
-            let myStore = this.pitsElem[this.myStorePos].children[0];
-            for (let i = 1; i < this.pitsNum + 1; i++) {
-                let seeds = this.pitsElem[i].children[0];
-                let seedsNum = seeds.children.length;
-
-                // Moving seeds to my Store
-                for (let j = 0; j < seedsNum; j++)
-                    Board.moveSeedTo(seeds.firstChild, myStore);
-
-                // Updating pit Value text and Array
-                this.pits[this.myStorePos] += this.pits[i];
-                this.pits[i] = 0;
-
-                this.pitsElem[this.myStorePos].firstChild.nodeValue = this.pits[this.myStorePos];
-                this.pitsElem[i].firstChild.nodeValue = this.pits[i];
-            }
+            for (let i = 1; i < this.pitsNum + 1; i++)
+                this.moveNSeeds(i, this.myStorePos, this.pits[i]);
         }
 
         let msg = "Draw";
@@ -207,6 +192,25 @@ class Board {
         else if (this.pits[this.enemyStorePos] > this.pits[this.myStorePos])
             msg = "You Lost";
         console.log(msg);
+    }
+
+    // Moves n seeds from the pit[from_i] to pit[to_i]
+    moveNSeeds(from_i, to_i, n) {
+        if (n > this.pits[from_i]) return -1;
+
+        let fromValue = this.pitsElem[from_i].childNodes[0];
+        let fromPit = this.pitsElem[from_i].children[0];
+        let toValue = this.pitsElem[to_i].childNodes[0];
+        let toPit = this.pitsElem[to_i].children[0];
+
+        this.pits[from_i] -= n;
+        this.pits[to_i] += n;
+
+        // Moving n seeds
+        fromValue.nodeValue = this.pits[from_i];
+        for (let i = 0; i < n; i++)
+            Board.moveSeedTo(fromPit.firstChild, toPit);
+        toValue.nodeValue = this.pits[to_i];
     }
 
     // Creates a seed div randomly positions it and returns the div element
