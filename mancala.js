@@ -1,4 +1,5 @@
 // Used for Board class
+const boardClass = "holesGrid"
 const PitsGridClass = "smallHolesGrid";
 const topPitsGridClass = "smallHolesTop";
 const botPitsGridClass = "smallHolesBottom";
@@ -20,17 +21,17 @@ const pitShadow = "inset 10px 10px 10px rgba(0, 0, 0, 0.5)";
 const pitHighlightBlue = "0 0 2vh blue";
 const pitHighlightRed = "0 0 2vh red";
 
-let board;
+let mancala;
 
 /* Here we will assume the capture pit in the 0th position is the enemy store
 and the capture pit in the pitsNum position is my store this way we can use % (mod) operator to
 distribute the seeds*/
-class Board {
+class Mancala {
 
     constructor(pitsNum, seedsNum, boardID, mode, ai_difficulty) {
         this.pitsNum = pitsNum; // Number of pits per row (Stores are not counted here)
         this.pits = Array(this.pitsNum * 2 + 2); // Number of seeds each pit has (including both stores)
-        this.boardID = boardID; // ID where board will be constructed
+        this.boardID = boardID; // ID where mancala will be constructed
         this.pitsElem = Array(this.pitsNum * 2 + 2); // Array that will hold the div that contains the pit and the value
         this.turn = true; // Bool indicating whose turn it is
         this.myStorePos = pitsNum + 1;
@@ -48,6 +49,7 @@ class Board {
             else
                 this.pits[i] = seedsNum;
         }
+        boardID.className = boardClass;
     }
 
     initBoard(clickEvent) {
@@ -144,14 +146,14 @@ class Board {
 
         for (let i = 0; i < this.pits.length; i++) {
             for (let j = 0; j < this.pits[i]; j++) {
-                Board.createSeed(this.pitsElem[i].children[0]);
+                Mancala.createSeed(this.pitsElem[i].children[0]);
             }
         }
     }
 
     AImove() {
         if (this.ai == 0) {
-            Board.randomPlay(this);
+            MancalaAI.randomPlay(this);
         }
     }
 
@@ -178,7 +180,7 @@ class Board {
 
     changeTurn() {
         this.turn = this.turn ? false : true;
-        
+
     }
 
     // Receives last played seed position and enforces the rules based on the position
@@ -253,7 +255,7 @@ class Board {
         // Moving n seeds
         fromValue.nodeValue = this.pits[from_i];
         for (let i = 0; i < n; i++)
-            Board.moveSeedTo(fromPit.firstChild, toPit);
+            Mancala.moveSeedTo(fromPit.firstChild, toPit);
         toValue.nodeValue = this.pits[to_i];
     }
 
@@ -301,7 +303,7 @@ class Board {
         // Random Color
         style.backgroundColor = "rgb(" + Math.floor(Math.random() * 255) + " " + Math.floor(Math.random() * 255) + " " + Math.floor(Math.random() * 255) + ")";
         style.position = "absolute";
-        Board.moveSeedTo(seed, parent);
+        Mancala.moveSeedTo(seed, parent);
         return seed;
     }
 
@@ -323,13 +325,16 @@ class Board {
         parent.appendChild(seed);
     }
 
-    static randomPlay(board) {
-        let pitPlayed;
-        do {
-            pitPlayed = Math.floor(Math.random() * board.pitsNum) + 1;
-            pitPlayed += board.myStorePos;
-        } while (board.pits[pitPlayed] == 0);
-        board.movePit(pitPlayed);
-    }
+
 }
 
+class MancalaAI {
+    static randomPlay(mancala) {
+        let pitPlayed;
+        do {
+            pitPlayed = Math.floor(Math.random() * mancala.pitsNum) + 1;
+            pitPlayed += mancala.myStorePos;
+        } while (mancala.pits[pitPlayed] == 0);
+        mancala.movePit(pitPlayed);
+    }
+}

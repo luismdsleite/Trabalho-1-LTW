@@ -9,7 +9,7 @@ const openPopButton = document.querySelectorAll('[data-pop-target]');
 const closePopButton = document.querySelectorAll('[data-close-button]');
 const overlay = document.getElementById('overlay');
 
-parseConfigs(); // To have a predefined board
+parseConfigs(); // To have a predefined mancala
 
 // remove pop up
 function openPop(pop) {
@@ -63,29 +63,29 @@ function parseConfigs() {
 
 	// If within expected range
 	else if (seedsNum >= minSeeds && seedsNum <= maxSeeds && pitsNum >= minPits && pitsNum <= maxPits) {
-		let boardElement = document.getElementById("board");
+		let boardElement = document.getElementById("mancala");
 		if (boardElement !== undefined) boardElement.textContent = '';
 
 		let ai;
 		// choosing mode
 		if (configs.opponent.selectedIndex == 1)
-			board = new Board(pitsNum, seedsNum, boardElement, 'local');
+			mancala = new Mancala(pitsNum, seedsNum, boardElement, 'local');
 		else if (configs.opponent.selectedIndex == 0)
-			board = new Board(pitsNum, seedsNum, boardElement, 'multiplayer');
+			mancala = new Mancala(pitsNum, seedsNum, boardElement, 'multiplayer');
 		else {
-			board = new Board(pitsNum, seedsNum, boardElement, 'ai', configs.opponent.selectedIndex - 2);
+			mancala = new Mancala(pitsNum, seedsNum, boardElement, 'ai', configs.opponent.selectedIndex - 2);
 			ai = configs.opponent.selectedIndex;
 		}
 		// choosing who plays first
 		if (configs.firstMove.selectedIndex != 0) {
-			board.changeTurn();
+			mancala.changeTurn();
 		}
 
 
-		// Initializing board with function in boardEvents.js
-		board.initBoard(clickPit);
+		// Initializing mancala with function in boardEvents.js
+		mancala.initBoard(clickPit);
 		
-		if (board.mode == 'ai' && !board.turn) board.AImove();
+		if (mancala.mode == 'ai' && !mancala.turn) mancala.AImove();
 
 	}
 	else {
