@@ -9,7 +9,7 @@ const openPopButton = document.querySelectorAll('[data-pop-target]');
 const closePopButton = document.querySelectorAll('[data-close-button]');
 const overlay = document.getElementById('overlay');
 
-parseConfigs() // To have a predefined board
+parseConfigs(); // To have a predefined board
 
 // remove pop up
 function openPop(pop) {
@@ -65,15 +65,28 @@ function parseConfigs() {
 	else if (seedsNum >= minSeeds && seedsNum <= maxSeeds && pitsNum >= minPits && pitsNum <= maxPits) {
 		let boardElement = document.getElementById("board");
 		if (boardElement !== undefined) boardElement.textContent = '';
-		board = new Board(pitsNum, seedsNum, boardElement);
-		// choosing who plays first
-		if (configs.firstMove.selectedIndex != 0) board.changeTurn();
+
+		let ai;
 		// choosing mode
-		if (configs.opponent.selectedIndex == 1) board.initBoard(clickPit, 'local');
-		else if (configs.opponent.selectedIndex == 0) board.initBoard(clickPit, 'multiplayer');
+		if (configs.opponent.selectedIndex == 1)
+			board = new Board(pitsNum, seedsNum, boardElement, 'local');
+		else if (configs.opponent.selectedIndex == 0)
+			board = new Board(pitsNum, seedsNum, boardElement, 'multiplayer');
 		else {
-			board.initBoard(clickPit, 'ai');
+			board = new Board(pitsNum, seedsNum, boardElement, 'ai', configs.opponent.selectedIndex - 2);
+			ai = configs.opponent.selectedIndex;
 		}
+		// choosing who plays first
+		if (configs.firstMove.selectedIndex != 0) {
+			board.changeTurn();
+		}
+
+
+		// Initializing board with function in boardEvents.js
+		board.initBoard(clickPit);
+		
+		if (board.mode == 'ai' && !board.turn) board.AImove();
+
 	}
 	else {
 		window.alert("Input invalido são aceites entre " + minPits + " a " + maxPits +

@@ -27,7 +27,7 @@ and the capture pit in the pitsNum position is my store this way we can use % (m
 distribute the seeds*/
 class Board {
 
-    constructor(pitsNum, seedsNum, boardID) {
+    constructor(pitsNum, seedsNum, boardID, mode, ai_difficulty) {
         this.pitsNum = pitsNum; // Number of pits per row (Stores are not counted here)
         this.pits = Array(this.pitsNum * 2 + 2); // Number of seeds each pit has (including both stores)
         this.boardID = boardID; // ID where board will be constructed
@@ -35,7 +35,8 @@ class Board {
         this.turn = true; // Bool indicating whose turn it is
         this.myStorePos = pitsNum + 1;
         this.enemyStorePos = 0;
-        this.mode;
+        this.mode = mode; // Local, Multiplayer, vs AI
+        this.ai = ai_difficulty; // Only used vs AI
 
         // Settings stores to both have 0 seeds
         this.pits[this.myStorePos] = 0;
@@ -49,18 +50,19 @@ class Board {
         }
     }
 
-    initBoard(clickEvent, mode) {
+    initBoard(clickEvent) {
         this.initHoles();
         this.initSeeds();
-        this.mode = mode;
-        if (mode == 'local')
+
+        if (this.mode == 'local')
             for (let i = 1; i < this.pitsNum * 2 + 2; i++) {
-                if (i == board.myStorePos || i == board.enemyStorePos) continue;
+                if (i == this.myStorePos || i == this.enemyStorePos) continue;
                 this.pitsElem[i].children[0].addEventListener("click", clickEvent, false);
             }
-        else if (mode == 'multiplayer' || mode == 'ai')
+        else if (this.mode == 'multiplayer' || this.mode == 'ai') {
             for (let i = 1; i < this.myStorePos; i++)
                 this.pitsElem[i].children[0].addEventListener("click", clickEvent, false);
+        }
         else {
             console.error("No valid mode selected, InitBoard()");
             return -1;
@@ -106,7 +108,7 @@ class Board {
         smallPitsGrid.appendChild(smallBotGrid);
 
         // Creating my capture pits
-        for (let i = 0; i < board.pitsNum; i++) {
+        for (let i = 0; i < this.pitsNum; i++) {
             let divParent = document.createElement("div");
             divParent.className = pitBottomParent;
             let div = document.createElement("div");
@@ -117,7 +119,7 @@ class Board {
             this.pitsElem[1 + i] = divParent;
         }
         // Creating enemy capture pits
-        for (let i = 0; i < board.pitsNum; i++) {
+        for (let i = 0; i < this.pitsNum; i++) {
             let divParent = document.createElement("div");
             divParent.className = pitTopParent;
             let div = document.createElement("div");
@@ -147,17 +149,47 @@ class Board {
         }
     }
 
+    AImove() {
+        if (this.ai == 0) {
+            Board.randomPlay(this);
+        }
+    }
+
+    // Executes the move chosen by the player 
+    movePit(pit_i) {
+        // Saving clicked pit since i var will be used
+        let i = pit_i;
+        let seeds_num = this.pits[pit_i];
+        while (seeds_num > 0) {
+            i = (i + 1) % (this.pitsNum * 2 + 2);
+            // If i reach a enemy store and its my turn or vice-versa dont place a seed in it
+            if (!((i == this.enemyStorePos && this.turn) || (i == this.myStorePos && !this.turn))) {
+                this.moveNSeeds(pit_i, i, 1);
+                seeds_num--;
+            }
+        }
+        let state = this.endTurn(i);
+        this.highlightPits();
+
+        if (state != 0 && this.mode == 'ai' && !this.turn) {
+            this.AImove();
+        }
+    }
+
     changeTurn() {
-        board.turn = board.turn ? false : true;
+        this.turn = this.turn ? false : true;
+        
     }
 
     // Receives last played seed position and enforces the rules based on the position
     endTurn(i) {
-        if (this.checkIfEnded())
+        if (this.checkIfEnded()) {
             this.endGame();
+            return 0;
+        }
         // Landed in my empty pit when it was my turn, then collect seeds from my and the opposing pit, and play again
         else if (this.pits[i] == 1 &&
-            ((i > 0 && i < this.myStorePos && board.turn) || (i > this.myStorePos && i < this.pitsNum * 2 + 2 && !board.turn))
+            ((i > 0 && i < this.myStorePos && this.turn) || (i > this.myStorePos && i < this.pitsNum * 2 + 2 && !this.turn))
         ) {
             let storePos = this.turn ? this.myStorePos : this.enemyStorePos;
             this.moveNSeeds(i, storePos, 1);
@@ -165,8 +197,11 @@ class Board {
             let opp_i = this.pitsNum * 2 + 2 - i;
             this.moveNSeeds(opp_i, storePos, this.pits[opp_i]);
 
-            if (this.checkIfEnded())
+            if (this.checkIfEnded()) {
                 this.endGame();
+                return 0;
+            }
+
             this.changeTurn();
             return 2;
         }
@@ -177,8 +212,9 @@ class Board {
     }
 
     checkIfEnded() {
-        let sumMyPits = this.pits.slice(1, this.myStorePos).reduce((a, b) => a + b, 0);
-        let sumEnemyPits = this.pits.slice(this.myStorePos + 1, this.pitsNum * 2 + 2).reduce((a, b) => a + b, 0);
+        let add = (a, b) => a + b;
+        let sumMyPits = this.pits.slice(1, this.myStorePos).reduce(add, 0);
+        let sumEnemyPits = this.pits.slice(this.myStorePos + 1, this.pitsNum * 2 + 2).reduce(add, 0);
 
         if (sumMyPits == 0 || sumEnemyPits == 0)
             return true;
@@ -196,9 +232,9 @@ class Board {
 
         let msg = "Draw";
         if (this.pits[this.enemyStorePos] < this.pits[this.myStorePos])
-            msg = "You Won";
+            msg = this.mode == "local" ? "Player 1 Won" : "You Won";
         else if (this.pits[this.enemyStorePos] > this.pits[this.myStorePos])
-            msg = "You Lost";
+            msg = this.mode == "local" ? "Player 2 Won" : "You Lost";
         console.log(msg);
     }
 
@@ -287,7 +323,13 @@ class Board {
         parent.appendChild(seed);
     }
 
-
-
+    static randomPlay(board) {
+        let pitPlayed;
+        do {
+            pitPlayed = Math.floor(Math.random() * board.pitsNum) + 1;
+            pitPlayed += board.myStorePos;
+        } while (board.pits[pitPlayed] == 0);
+        board.movePit(pitPlayed);
+    }
 }
 

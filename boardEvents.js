@@ -1,5 +1,6 @@
 // Js that will hold all of the board events, must be called after board.js
 
+// Check if a valid pit was selected and executes that play
 function clickPit(event) {
     let pit_i = event.target;
 
@@ -24,18 +25,6 @@ function clickPit(event) {
     else if (board.pits[i] == 0)
         return -3;
 
-    // Saving clicked pit since i var will be used
-    let clicked_i = i;
-    let seeds_num = pit_i.children.length;
-    while (seeds_num > 0) {
-        i = (i + 1) % (board.pitsNum * 2 + 2);
-        // If i reach a enemy store and its my turn or vice-versa dont place a seed in it
-        if (!((i == board.enemyStorePos && board.turn) || (i == board.myStorePos && !board.turn))) {
-            board.moveNSeeds(clicked_i, i, 1);
-            seeds_num--;
-        }
-    }
-    // Following rules based on the place of the last seed
-    board.endTurn(i);
-    board.highlightPits();
+    board.movePit(i);
+    return 0;
 }
