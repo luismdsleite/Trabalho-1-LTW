@@ -50,6 +50,7 @@ class Mancala {
                 this.pits[i] = seedsNum;
         }
         boardID.className = boardClass;
+
     }
 
     initBoard(clickEvent) {
@@ -224,20 +225,18 @@ class Mancala {
     }
 
     endGame() {
-        if (this.turn) {
-            for (let i = this.myStorePos + 1; i < this.pitsNum * 2 + 2; i++)
-                this.moveNSeeds(i, this.enemyStorePos, this.pits[i]);
-        } else {
-            for (let i = 1; i < this.pitsNum + 1; i++)
-                this.moveNSeeds(i, this.myStorePos, this.pits[i]);
-        }
+        let targetStore = this.turn ? this.myStorePos : this.enemyStorePos;
+        for (let i = 1; i < this.myStorePos; i++)
+            if (this.pits[i] != 0) this.moveNSeeds(i, targetStore, this.pits[i]);
+        for (let i = this.myStorePos + 1; i < this.pitsNum + 2 * 2; i++)
+            if (this.pits[i] != 0) this.moveNSeeds(i, targetStore, this.pits[i]);
 
         let msg = "Draw";
         if (this.pits[this.enemyStorePos] < this.pits[this.myStorePos])
             msg = this.mode == "local" ? "Player 1 Won" : "You Won";
         else if (this.pits[this.enemyStorePos] > this.pits[this.myStorePos])
             msg = this.mode == "local" ? "Player 2 Won" : "You Lost";
-        setTimeout( () => alert(msg), 500);
+        setTimeout(() => alert(msg), 500);
     }
 
     // Moves n seeds from the pit[from_i] to pit[to_i]
@@ -324,8 +323,6 @@ class Mancala {
         seed.style.top = (50 - (height / rectparent.height) * 100 / 2) + randomOffset2 + "%";
         parent.appendChild(seed);
     }
-
-
 }
 
 class MancalaAI {
