@@ -80,7 +80,7 @@ class Mancala {
         enemyStoreParent.classList = storeLeftParent;
         let enemyStore = document.createElement("div");
         enemyStore.classList = enemyStoreClass;
-        enemyStoreParent.textContent = "0";
+        enemyStoreParent.textContent = this.pits[this.enemyStorePos];
         enemyStoreParent.appendChild(enemyStore);
         this.boardID.appendChild(enemyStoreParent);
 
@@ -94,7 +94,7 @@ class Mancala {
         myStoreParent.classList = storeRightParent;
         let myStore = document.createElement("div");
         myStore.classList = myStoreClass;
-        myStoreParent.textContent = "0";
+        myStoreParent.textContent = this.pits[this.myStorePos];
         myStoreParent.appendChild(myStore);
         this.boardID.appendChild(myStoreParent);
 
@@ -237,7 +237,7 @@ class Mancala {
             msg = this.mode == "local" ? "Player 1 Won" : "You Won";
         else if (this.pits[this.enemyStorePos] > this.pits[this.myStorePos])
             msg = this.mode == "local" ? "Player 2 Won" : "You Lost";
-        console.log(msg);
+        setTimeout( () => alert(msg), 500);
     }
 
     // Moves n seeds from the pit[from_i] to pit[to_i]

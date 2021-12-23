@@ -27,8 +27,16 @@ function closePop(pop) {
 
 // Listener to open a pop
 openPopButton.forEach(button => {
+	const popTarget = button.dataset.popTarget;
+
 	button.addEventListener('click', () => {
-		const pop = document.querySelector(button.dataset.popTarget);
+		const pop = document.querySelector(popTarget);
+		if (popTarget == '#pop4') {
+			const divs = Array.from(document.querySelectorAll(".pop-body"));
+			const popBody4 = divs.filter(item => item.parentNode.id == 'pop4')[0];
+			getRanking(popBody4)
+				.catch(e => alert("Unable to fetch leaderboard"));
+		}
 		openPop(pop);
 	});
 });
@@ -84,7 +92,7 @@ function parseConfigs() {
 
 		// Initializing mancala with function in boardEvents.js
 		mancala.initBoard(clickPit);
-		
+
 		if (mancala.mode == 'ai' && !mancala.turn) mancala.AImove();
 
 	}
