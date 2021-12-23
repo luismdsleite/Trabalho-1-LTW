@@ -128,6 +128,9 @@ async function parseAuth() {
 	if (answer == "Login was Successful") {
 		nick = formNick;
 		pass = formPass;
+	} else{
+		nick = undefined;
+		pass = undefined;
 	}
 	alert(answer);
 	return;
