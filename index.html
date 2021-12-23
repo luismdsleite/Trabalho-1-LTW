@@ -35,13 +35,16 @@
     <button class="button-1" data-pop-target="#pop2">Autenticação<br></button>
     <div id="pop2" class="pop">
       <div class="pop-header">
-        <div class="pop_title">Autenticação</div>
+        <div class="pop_title">Login/Registro</div>
         <button data-close-button class="close-button">&times;</button>
       </div>
       <div class=pop-body>
-        <form id="authentication-form">
+        <form id="auth-form">
           <label for="fname">Nome do Utilizador:</label><br>
           <input type="text" id="fname" name="fname_name"><br>
+          <label for="fpass">Palavra-Passe:</label><br>
+          <input type="password" id="fpass" name="fpass"><br>
+          <button type="button" id="authButton">Submit</button>
         </form>
       </div>
     </div>
@@ -72,7 +75,7 @@
           <select id="firstMove">
             <option selected>Começar a jogar</option>
             <option>Dar a vez ao adversário</option>
-          </select>
+          </select><br>
           <button type="button" id="configFormButton">Submit</button>
         </form>
       </div>

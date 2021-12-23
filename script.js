@@ -1,4 +1,6 @@
 // Used for configs
+const authForm = document.getElementById("auth-form");
+const authPop = document.getElementById("pop2");
 const configForm = document.getElementById("config-form");
 const configPop = document.getElementById("pop3");
 const minSeeds = 2;
@@ -8,6 +10,8 @@ const maxPits = 14;
 const openPopButton = document.querySelectorAll('[data-pop-target]');
 const closePopButton = document.querySelectorAll('[data-close-button]');
 const overlay = document.getElementById('overlay');
+
+let nick = undefined, pass = undefined;
 
 parseConfigs(); // To have a predefined mancala
 
@@ -59,6 +63,8 @@ closePopButton.forEach(button => {
 
 // Submit button on configurations
 configForm.children.configFormButton.addEventListener('click', parseConfigs, false);
+// Submit button on Authentication
+authForm.children.authButton.addEventListener('click', parseAuth, false);
 
 function parseConfigs() {
 	let configs = configForm.children;
@@ -78,8 +84,14 @@ function parseConfigs() {
 		// choosing mode
 		if (configs.opponent.selectedIndex == 1)
 			mancala = new Mancala(pitsNum, seedsNum, boardElement, 'local');
-		else if (configs.opponent.selectedIndex == 0)
+		else if (configs.opponent.selectedIndex == 0) {
+			if (nick == undefined) {
+				alert("Tem de tar logado para jogar multiplayer");
+				closePop(configPop);
+				return;
+			}
 			mancala = new Mancala(pitsNum, seedsNum, boardElement, 'multiplayer');
+		}
 		else {
 			mancala = new Mancala(pitsNum, seedsNum, boardElement, 'ai', configs.opponent.selectedIndex - 2);
 			ai = configs.opponent.selectedIndex;
@@ -103,3 +115,28 @@ function parseConfigs() {
 	closePop(configPop);
 
 }
+
+async function parseAuth() {
+	closePop(authPop);
+	let formNick = authForm.fname.value, formPass = authForm.fpass.value;
+
+	if (isNullOrWhitespace(formNick) || isNullOrWhitespace(formPass)) {
+		alert("Username ou Palavra-Passe não preenchidos");
+		return;
+	}
+	let answer = await register(formNick, formPass);
+	if (answer == "Login was Successful") {
+		nick = formNick;
+		pass = formPass;
+	}
+	alert(answer);
+	return;
+}
+
+
+
+function isNullOrWhitespace(input) {
+	return (typeof input === 'undefined' || input == null)
+		|| input.replace(/\s/g, '').length < 1;
+}
+
