@@ -1,5 +1,6 @@
+"use strict"
 // Used for Board class
-const boardClass = "holesGrid"
+const boardClass = "holesGrid";
 const PitsGridClass = "smallHolesGrid";
 const topPitsGridClass = "smallHolesTop";
 const botPitsGridClass = "smallHolesBottom";
@@ -20,15 +21,16 @@ const seedHeight = 3;
 const pitShadow = "inset 10px 10px 10px rgba(0, 0, 0, 0.5)";
 const pitHighlightBlue = "0 0 2vh blue";
 const pitHighlightRed = "0 0 2vh red";
+const seedAnimationTime = 0.25; // time for seed animation in seconds
 
 let mancala;
+
 
 /* Here we will assume the capture pit in the 0th position is the enemy store
 and the capture pit in the pitsNum position is my store this way we can use % (mod) operator to
 distribute the seeds*/
 class Mancala {
-
-    constructor(pitsNum, seedsNum, boardID, mode, ai_difficulty) {
+    constructor(pitsNum, seedsNum, boardID, mode, winLoseDrawFunct, ai_difficulty) {
         this.pitsNum = pitsNum; // Number of pits per row (Stores are not counted here)
         this.pits = Array(this.pitsNum * 2 + 2); // Number of seeds each pit has (including both stores)
         this.boardID = boardID; // ID where mancala will be constructed
@@ -50,21 +52,28 @@ class Mancala {
                 this.pits[i] = seedsNum;
         }
         boardID.className = boardClass;
-
+        this.clickEvent;
+        this.winLoseDrawFunct = winLoseDrawFunct;
     }
 
     initBoard(clickEvent) {
+        this.clickEvent = clickEvent;
         this.initHoles();
         this.initSeeds();
 
         if (this.mode == 'local')
             for (let i = 1; i < this.pitsNum * 2 + 2; i++) {
                 if (i == this.myStorePos || i == this.enemyStorePos) continue;
-                this.pitsElem[i].children[0].addEventListener("click", clickEvent, false);
+                let hole = this.pitsElem[i].children[0]
+                hole.addEventListener("click", clickEvent, false);
+                hole.i = i;
             }
         else if (this.mode == 'multiplayer' || this.mode == 'ai') {
-            for (let i = 1; i < this.myStorePos; i++)
-                this.pitsElem[i].children[0].addEventListener("click", clickEvent, false);
+            for (let i = 1; i < this.myStorePos; i++) {
+                let hole = this.pitsElem[i].children[0]
+                hole.addEventListener("click", clickEvent, false);
+                hole.i = i;
+            }
         }
         else {
             console.error("No valid mode selected, InitBoard()");
@@ -179,9 +188,41 @@ class Mancala {
         }
     }
 
+    // Sintoniza o quadro para ter a mesma configuração que o quadro do servidor
+    syncBoard(pits, turn) {
+        let pitsDiff = pits.slice().map((n, i) => n - this.pits[i]);
+        let min = this.turn ? 1 : this.myStorePos + 1;
+        let max = this.turn ? this.myStorePos : this.pitsNum * 2 + 2;
+
+        let interestPits = pitsDiff.slice(min, max);
+        let seedsMoved = Math.min(...interestPits);
+        let pitMoved = interestPits.indexOf(seedsMoved);
+
+        // Compensating slice() offset
+        if (!this.turn) pitMoved += this.myStorePos + 1;
+        else pitMoved += 1;
+
+        this.movePit(pitMoved);
+
+        // In case server and local Boards are not correctly synced
+        let arraysEqual = true;
+        for (let i = 0; i < this.pits.length; ++i) {
+            if (this.pits[i] !== pits[i]) arraysEqual = false;
+        }
+        if (!arraysEqual) {
+            console.log("BOARD WAS NOT SYNCED!");
+            this.boardID.textContent = "";
+            this.pits = pits;
+            this.pitsElem = Array(this.pitsNum * 2 + 2);
+            this.initBoard(this.clickEvent);
+        }
+
+        if (turn != this.turn) this.changeTurn();
+        this.highlightPits();
+    }
+
     changeTurn() {
         this.turn = this.turn ? false : true;
-
     }
 
     // Receives last played seed position and enforces the rules based on the position
@@ -225,18 +266,16 @@ class Mancala {
     }
 
     endGame() {
-        let targetStore = this.turn ? this.myStorePos : this.enemyStorePos;
         for (let i = 1; i < this.myStorePos; i++)
-            if (this.pits[i] != 0) this.moveNSeeds(i, targetStore, this.pits[i]);
-        for (let i = this.myStorePos + 1; i < this.pitsNum + 2 * 2; i++)
-            if (this.pits[i] != 0) this.moveNSeeds(i, targetStore, this.pits[i]);
+            if (this.pits[i] != 0) this.moveNSeeds(i, this.myStorePos, this.pits[i]);
+        for (let i = this.myStorePos + 1; i < this.pitsNum * 2 + 2; i++)
+            if (this.pits[i] != 0) this.moveNSeeds(i, this.enemyStorePos, this.pits[i]);
 
-        let msg = "Draw";
         if (this.pits[this.enemyStorePos] < this.pits[this.myStorePos])
-            msg = this.mode == "local" ? "Player 1 Won" : "You Won";
+            this.winLoseDrawFunct[0]();
         else if (this.pits[this.enemyStorePos] > this.pits[this.myStorePos])
-            msg = this.mode == "local" ? "Player 2 Won" : "You Lost";
-        setTimeout(() => alert(msg), 500);
+            this.winLoseDrawFunct[1]();
+        else this.winLoseDrawFunct[2]();
     }
 
     // Moves n seeds from the pit[from_i] to pit[to_i]
@@ -254,7 +293,7 @@ class Mancala {
         // Moving n seeds
         fromValue.nodeValue = this.pits[from_i];
         for (let i = 0; i < n; i++)
-            Mancala.moveSeedTo(fromPit.firstChild, toPit);
+            Mancala.moveSeedTo(fromPit.firstChild, toPit, true);
         toValue.nodeValue = this.pits[to_i];
     }
 
@@ -292,6 +331,8 @@ class Mancala {
         }
     }
 
+
+
     // Creates a seed div randomly positions it and returns the div element
     static createSeed(parent) {
         let seed = document.createElement("div");
@@ -302,26 +343,55 @@ class Mancala {
         // Random Color
         style.backgroundColor = "rgb(" + Math.floor(Math.random() * 255) + " " + Math.floor(Math.random() * 255) + " " + Math.floor(Math.random() * 255) + ")";
         style.position = "absolute";
-        Mancala.moveSeedTo(seed, parent);
+        Mancala.moveSeedTo(seed, parent, false);
         return seed;
     }
 
     // positions a seed in parent pit in a random position
-    static moveSeedTo(seed, parent) {
+    static moveSeedTo(seed, parent, animated) {
+
+        let div;
+        if (animated) {
+            // Creating a "Fake" seed on top the real one, and making the other one invisible
+            div = document.createElement("div");
+            div.className = seed.className;
+            div.setAttribute('style', seed.getAttribute('style'));
+            let seedRect = seed.getBoundingClientRect();
+            document.body.appendChild(div);
+            div.style.position = "absolute";
+            div.style.left = seedRect.left + "px";
+            div.style.top = seedRect.top + "px";
+            div.style.transition = "all " + seedAnimationTime + "s linear";
+            seed.style.display = "none";
+        }
+
         const offset = 25;
         // Generating 2 random offsets that range from -offset to offset
         let randomOffset1 = Math.floor(Math.random() * (offset - (-offset) + 1)) + (-offset);
         let randomOffset2 = Math.floor(Math.random() * (offset - (-offset) + 1)) + (-offset);
-
         let rectparent = parent.getBoundingClientRect();
         // Converting vh to px
         let width = window.innerWidth * seedWidth / 100;
         let height = window.innerHeight * seedHeight / 100;
-
         // converting px to % and centering seed in the middle of parent (with a random offset)
         seed.style.left = (50 - (width / rectparent.width) * 100 / 2) + randomOffset1 + "%";
         seed.style.top = (50 - (height / rectparent.height) * 100 / 2) + randomOffset2 + "%";
         parent.appendChild(seed);
+
+        if (animated) {
+            // Moving "Fake" seed to target pit, making real seed visible and removing the "Fake" seed 
+            let randomOffset1PX = (rectparent.width) * randomOffset1 / 100 // converted to pixels
+            let randomOffset2PX = (rectparent.height) * randomOffset2 / 100 // converted to pixels
+            div.style.position = "absolute";
+            div.style.left = (rectparent.left + rectparent.width / 2 - width / 2 + randomOffset1PX) + "px";
+            div.style.top = (rectparent.top + rectparent.height / 2 - height / 2 + randomOffset2PX) + "px";
+            setTimeout((div, seed) => {
+                seed.style.display = "";
+                div.remove();
+            }, seedAnimationTime * 1000, div, seed);
+        }
+
+
     }
 }
 

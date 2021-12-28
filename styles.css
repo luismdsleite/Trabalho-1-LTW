@@ -31,7 +31,6 @@ h1 {
     font-weight: bold;
     border-radius: 0.5em;
     color: #fff;
-    
 }
 
 form {
@@ -56,4 +55,16 @@ td, th {
 
 tr:nth-child(even) {
     background-color: #dddddd;
+}
+
+.leave-button {
+    display: flex;
+    background-color: #e74412;
+    border: transparent;
+    padding: 0.5em;
+    font-size: 1.5rem;
+    font-weight: bold;
+    border-radius: 0.5em;
+    color: #fff;
+    margin: 2vh auto auto auto;
 }
