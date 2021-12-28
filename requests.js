@@ -16,7 +16,10 @@ let group = '39429'; // For debugging
 async function getRanking(div) {
     const init = {
         method: 'POST',
-        body: JSON.stringify({})
+        body: JSON.stringify(
+            {
+                mode: 'cors'
+            })
     };
     const req = await request('ranking', init);
     const data = await req.json();
@@ -47,6 +50,7 @@ async function register(nick, pass) {
         body: JSON.stringify({
             'nick': nick,
             'password': pass,
+            mode: 'cors'
         })
     };
     const req = await request('register', init);
@@ -83,7 +87,8 @@ async function join(nick, pass, size, initial) {
             'nick': nick,
             'password': pass,
             'size': size,
-            'initial': initial
+            'initial': initial,
+            mode: 'cors'
         })
     };
     const req = await request('join', init);
@@ -98,7 +103,8 @@ async function leave(nick, pass, game) {
             'group': group,
             'nick': nick,
             'password': pass,
-            'game': game
+            'game': game,
+            mode: 'cors'
         })
     };
     const req = await request('leave', init);
@@ -113,7 +119,8 @@ async function notify(nick, pass, game, move) {
             'nick': nick,
             'password': pass,
             'game': game,
-            'move': move
+            'move': move,
+            mode: 'cors'
         })
     };
     const req = await request('notify', init);
