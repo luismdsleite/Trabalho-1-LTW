@@ -350,7 +350,7 @@ class Mancala {
     // positions a seed in parent pit in a random position
     static moveSeedTo(seed, parent, animated) {
 
-        let div;
+        let div, scrollTop = document.documentElement.scrollTop;
         if (animated) {
             // Creating a "Fake" seed on top the real one, and making the other one invisible
             div = document.createElement("div");
@@ -360,7 +360,7 @@ class Mancala {
             document.body.appendChild(div);
             div.style.position = "absolute";
             div.style.left = seedRect.left + "px";
-            div.style.top = seedRect.top + "px";
+            div.style.top = seedRect.top + scrollTop + "px";
             div.style.transition = "all " + seedAnimationTime + "s linear";
             seed.style.display = "none";
         }
@@ -384,13 +384,12 @@ class Mancala {
             let randomOffset2PX = (rectparent.height) * randomOffset2 / 100 // converted to pixels
             div.style.position = "absolute";
             div.style.left = (rectparent.left + rectparent.width / 2 - width / 2 + randomOffset1PX) + "px";
-            div.style.top = (rectparent.top + rectparent.height / 2 - height / 2 + randomOffset2PX) + "px";
+            div.style.top = (rectparent.top + rectparent.height / 2 - height / 2 + randomOffset2PX) + scrollTop + "px";
             setTimeout((div, seed) => {
                 seed.style.display = "";
                 div.remove();
             }, seedAnimationTime * 1000, div, seed);
         }
-
 
     }
 }
