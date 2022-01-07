@@ -88,18 +88,20 @@ function parseConfigs() {
 			mancala = new Mancala(pitsNum, seedsNum, boardElement, 'local', [win, lose, draw]);
 		else if (configs.opponent.selectedIndex == 0) {
 			if (nick == undefined) {
-				alert("Tem de tar logado para jogar multiplayer");
+				alert("Login is required for multiplayer, please log in and try again");
 				closePop(configPop);
 				return;
 			}
 			if (multiplayerStatus === undefined) multiplayerStatus = document.createElement("button");
 			multiplayerStatus.className = "button-1";
-			multiplayerStatus.textContent = "Criando Jogo";
+			multiplayerStatus.textContent = "Creating Game";
 			document.getElementById("interface").appendChild(multiplayerStatus);
 			if (leaveButton === undefined) leaveButton = document.createElement("button");
 			leaveButton.className = "leave-button";
-			leaveButton.textContent = "Sair do Jogo";
-			leaveButton.addEventListener('click', () => leave(nick, pass, game).catch("Não se encontra num jogo online"), false);
+			leaveButton.textContent = "Leave Game";
+			leaveButton.addEventListener('click',
+				() => leave(nick, pass, game),
+				false);
 			mancala = new Mancala(pitsNum, seedsNum, boardElement, 'multiplayer', [win, lose, draw]);
 			mancala.boardID.parentNode.insertBefore(leaveButton, mancala.boardID.nextSibling);
 			setUpMultiplayer(pitsNum, seedsNum, boardElement);
@@ -119,8 +121,8 @@ function parseConfigs() {
 
 	}
 	else {
-		window.alert("Input invalido são aceites entre " + minPits + " a " + maxPits +
-			" cavidades por linha e entre " + minSeeds + " a " + maxPits + " sementes por cavidade");
+		window.alert("Invalid input, you can choose between " + minPits + " a " + maxPits +
+			" pits per row and " + minSeeds + " a " + maxPits + " seeds per pit");
 	}
 	closePop(configPop);
 
@@ -131,21 +133,21 @@ async function parseAuth() {
 	let formNick = authForm.fname.value, formPass = authForm.fpass.value;
 
 	if (isNullOrWhitespace(formNick) || isNullOrWhitespace(formPass)) {
-		alert("Username ou Palavra-Passe não preenchidos");
+		alert("Username or Password were left blank");
 		return;
 	}
-	let answer = await register(formNick, formPass);
-	if (answer == "Login was Successful") {
+	let req = await register(formNick, formPass);
+	if (req.ok) {
 		nick = formNick;
 		pass = formPass;
+		alert("Logado com sucesso");
 	} else {
+		if (req.status == 400)
+			alert("An existing user with a different password already exists");
 		nick = undefined;
 		pass = undefined;
 	}
-	alert(answer);
-	return;
 }
-
 
 function isNullOrWhitespace(input) {
 	return (typeof input === 'undefined' || input == null)
@@ -153,20 +155,26 @@ function isNullOrWhitespace(input) {
 }
 
 async function setUpMultiplayer(pitsNum, seedsNum) {
-	game = await join(nick, pass, pitsNum, seedsNum);
-	multiplayerStatus.textContent = "À espera de jogadores";
-	eventSrc = await update(nick, game, serverUpdate, serverError);
+	let req = await join(nick, pass, pitsNum, seedsNum);
+	if (req.ok) {
+		let data = await req.json();
+		game = data.game;
+		multiplayerStatus.textContent = "Waiting for a plyer to join";
+		eventSrc = await update(nick, game, serverUpdate, serverError);
+	} else {
+		alert("An error ocurred while creating a game");
+	}
 }
 
 async function serverUpdate(e) {
 	let data = JSON.parse(e.data);
 	if (data.winner !== undefined) {
 		if (data.winner === null)
-			setTimeout(() => alert("Desististe do Jogo"), seedAnimationTime * 1000 * 2);
+			setTimeout(() => alert("Stopped Search"), seedAnimationTime * 1000 * 2);
 		else if (data.winner === nick)
-			setTimeout(() => alert("Ganhaste"), seedAnimationTime * 1000 * 2);
+			setTimeout(() => alert("You Won"), seedAnimationTime * 1000 * 2);
 		else if (data.winner === opponent)
-			setTimeout(() => alert("Perdeste"), seedAnimationTime * 1000 * 2);
+			setTimeout(() => alert("You Lost"), seedAnimationTime * 1000 * 2);
 		multiplayerStatus.parentNode.removeChild(multiplayerStatus);
 		leaveButton.parentNode.removeChild(leaveButton);
 		multiplayerStatus = undefined;
@@ -179,7 +187,7 @@ async function serverUpdate(e) {
 	else {
 		if (opponent === undefined) {
 			// Creating board and warning user a match was found
-			multiplayerStatus.textContent = "Found a match";
+			multiplayerStatus.textContent = "Game Found";
 			if ((data.board.turn != nick && mancala.turn) || (data.board.turn == nick && !mancala.turn)) {
 				mancala.changeTurn();
 			}
@@ -187,8 +195,8 @@ async function serverUpdate(e) {
 			Object.keys(data.stores).forEach(player => {
 				if (player != nick) opponent = player;
 			});
-			if (mancala.turn) multiplayerStatus.textContent = "Vez de " + nick;
-			else multiplayerStatus.textContent = "Vez de " + opponent;
+			if (mancala.turn) multiplayerStatus.textContent = "Turn:" + nick;
+			else multiplayerStatus.textContent = "Turn:" + opponent;
 		} else {
 			// Transforming server board to a format that our local mancala board can read and sending to its syncBoard() method
 			let mancalaArray = [];
@@ -199,8 +207,8 @@ async function serverUpdate(e) {
 			mancalaArray.push(data.stores[nick]);
 			data.board.sides[opponent].pits.forEach(seeds => mancalaArray.push(seeds));
 			mancala.syncBoard(mancalaArray, data.board.turn == nick);
-			if (mancala.turn) multiplayerStatus.textContent = "Vez de " + nick;
-			else multiplayerStatus.textContent = "Vez de " + opponent;
+			if (mancala.turn) multiplayerStatus.textContent = "Turn:" + nick;
+			else multiplayerStatus.textContent = "Turn:" + opponent;
 		}
 	}
 }
@@ -211,13 +219,14 @@ async function serverError() {
 	leftGame = false;
 	eventSrc.close()
 	eventSrc = undefined;
-	alert("Algo de errado ocorreu a juntar à sessão, tente novamente ou dê refresh à pagina");
+	alert("Something went wrong");
 }
 
 async function notifyServer(i) {
-	const status = await notify(nick, pass, game, i);
-	if (status === "Successfully notified move");
-	else alert(status);
+	let req = await notify(nick, pass, game, i);
+	if (!req.ok) {
+		alert("Something went wrong");
+	}
 }
 
 

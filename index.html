@@ -21,10 +21,10 @@
   <div id="interface" class="interface">
     <div id="overlay"></div>
     <!-- Rules pop up -->
-    <button class="button-1" data-pop-target="#pop">Regras de jogo</button>
+    <button class="button-1" data-pop-target="#pop">Game Rules</button>
     <div id="pop" class="pop">
       <div class="pop-header">
-        <div class="pop_title">Regras de Jogo</div>
+        <div class="pop_title">Game Rules</div>
         <button data-close-button class="close-button">&times;</button>
       </div>
       <div class="pop-body">
@@ -32,49 +32,49 @@
       </div>
     </div>
     <!-- Authentication Pop -->
-    <button class="button-1" data-pop-target="#pop2">Autenticação<br></button>
+    <button class="button-1" data-pop-target="#pop2">Authentication<br></button>
     <div id="pop2" class="pop">
       <div class="pop-header">
-        <div class="pop_title">Login/Registro</div>
+        <div class="pop_title">Login/Register</div>
         <button data-close-button class="close-button">&times;</button>
       </div>
       <div class=pop-body>
         <form id="auth-form">
-          <label for="fname">Nome do Utilizador:</label><br>
+          <label for="fname">User:</label><br>
           <input type="text" id="fname" name="fname_name"><br>
-          <label for="fpass">Palavra-Passe:</label><br>
+          <label for="fpass">Password:</label><br>
           <input type="password" id="fpass" name="fpass"><br>
           <button type="button" id="authButton">Submit</button>
         </form>
       </div>
     </div>
     <!-- Configuration Pop -->
-    <button class="button-1" data-pop-target="#pop3">Configuração<br></button>
+    <button class="button-1" data-pop-target="#pop3">Configuration<br></button>
     <div id="pop3" class="pop">
       <div class="pop-header">
-        <div class="pop_title">Configuração</div>
+        <div class="pop_title">Configuration</div>
         <button data-close-button class="close-button">&times;</button>
       </div>
       <div class=pop-body>
         <form id="config-form">
-          <label for="holesNum">Número de cavidades:</label>
+          <label for="holesNum">Number of pits:</label>
           <input type="number" id="holesNum" name="holes_num_name" min="2" max="14" value="6"><br>
-          <label for="seedsNum">Número de sementes por cavidade:</label>
+          <label for="seedsNum">Number of seeds:</label>
           <input type="number" id="seedsNum" name="seeds_num_name" min="2" max="14" value="6"><br>
-          <label>Adversário:</label>
+          <label>Opponent:</label>
           <select id="opponent">
-            <option>Jogador (Multiplayer)</option>
-            <option selected>Jogador (Local)</option>
+            <option>User (Multiplayer)</option>
+            <option selected>User (Local)</option>
             <optgroup label=Computador(IA)>
-              <option>Dificuldade I</option>
-              <option>Dificuldade II</option>
-              <option>Dificuldade III</option>
+              <option>AI I</option>
+              <option>AI II</option>
+              <option>AI III</option>
             </optgroup>
           </select><br>
-          <label>Primeiro a jogar:</label>
+          <label>First Move:</label>
           <select id="firstMove">
-            <option selected>Começar a jogar</option>
-            <option>Dar a vez ao adversário</option>
+            <option selected>Myself</option>
+            <option>Opponent</option>
           </select><br>
           <button type="button" id="configFormButton">Submit</button>
         </form>

@@ -10,7 +10,7 @@ async function request(func, init) {
 }
 
 
-let group = '39429'; // For debugging
+let group = '59'; // For debugging
 
 // Requests ranking and fills the div with a table containing the JSON data
 async function getRanking(div) {
@@ -50,12 +50,7 @@ async function register(nick, pass) {
         })
     };
     const req = await request('register', init);
-    if (req.ok) {
-        return "Login was Successful";
-    } else {
-        let data = await req.json();
-        return data.error;
-    }
+    return req;
 }
 
 // Receives a function in case of a status update and if there occurs an error
@@ -86,9 +81,7 @@ async function join(nick, pass, size, initial) {
             'initial': initial
         })
     };
-    const req = await request('join', init);
-    let data = await req.json();
-    return data.game;
+    return await request('join', init);
 }
 
 async function leave(nick, pass, game) {
@@ -101,8 +94,8 @@ async function leave(nick, pass, game) {
             'game': game
         })
     };
-    const req = await request('leave', init);
-    let data = await req.json();
+    let req = await request('leave', init);
+    return req;
 }
 
 // Receives a function in case the move is rejected
@@ -116,11 +109,6 @@ async function notify(nick, pass, game, move) {
             'move': move
         })
     };
-    const req = await request('notify', init);
-    if (req.ok)
-        return "Successfully notified move"
-    else {
-        let data = await req.json();
-        return data.error;
-    }
+    let req = await request('notify', init);
+    return req;
 }
