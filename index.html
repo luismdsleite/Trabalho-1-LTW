@@ -23,11 +23,40 @@
     <button class="button-1" data-pop-target="#pop">Game Rules</button>
     <div id="pop" class="pop">
       <div class="pop-header">
-        <div class="pop_title">Regras de Jogo</div>
+        <div class="pop_title">Game Rules</div>
         <button data-close-button class="close-button">&times;</button>
       </div>
       <div class="pop-body">
-
+        <p>Each player has a store and some pits where they will “sow” the seeds.</p>
+        <figure>
+          <img src="/img/stage1.png" alt="stage1">
+        </figure>
+        <p>On a turn, a player picks up all the seeds in one pit and “sows” them counter clockwise, placing one seed in
+          each of the pits along the way.
+          If you come to your store, then add a seed to your store and continue. You may end up putting seeds in your
+          opponent's pits along the way but never on the it's store.</p>
+        <figure>
+          <img src="/img/stage2.png" alt="stage2">
+          <figcaption>In this example the player has chosen the 5th pit and the seems were accordingly distributed
+          </figcaption>
+        </figure>
+        <p>If the last seed falls within the player own store, then he can play again</p>
+        <figure>
+          <img src="/img/stage3.png" alt="stage3">
+          <figcaption>The player this time has chosen the 1st pit, since the last pit fell on his store he'll have to
+            play again</figcaption>
+        </figure>
+        <p>If the last seed falls on your own pit, all the seeds in the opposing pit go to your store</p>
+        <figure>
+          <img src="/img/stage4.png" alt="stage4">
+          <img src="/img/stage5.png" alt="stage5">
+          <figcaption>The player has chosen the 1st pit and consequently stolen all of the opposing pit seeds
+          </figcaption>
+        </figure>
+        <p>
+          The game is over when one player's pits are completely empty. The other player takes the seeds
+          remaining in her pits and puts those seeds in her store. The player with the most seeds on its store wins.
+        </p>
       </div>
     </div>
     <!-- Authentication Pop -->
