@@ -234,14 +234,17 @@ class Mancala {
         // In case server and local Boards are not correctly synced
         let arraysEqual = true;
         for (let i = 0; i < this.pits.length; ++i) {
-            if (this.pits[i] !== pits[i]) arraysEqual = false;
+            if (this.pits[i] !== pits[i]) {
+                arraysEqual = false;
+                break;
+            }
         }
         if (!arraysEqual) {
             console.log("BOARD WAS NOT SYNCED!");
             this.boardEle.textContent = "";
             this.pits = pits;
             this.pitsElem = Array(this.pitsNum * 2 + 2);
-            this.initBoard(this.clickEvent);
+            this.initBoard(this.clickEvent, this.boardEle.id);
         }
 
         if (turn != this.turn) this.changeTurn();
