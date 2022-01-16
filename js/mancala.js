@@ -23,24 +23,28 @@ const pitHighlightBlue = "0 0 2vh blue";
 const pitHighlightRed = "0 0 2vh red";
 const seedAnimationTime = 0.25; // time for seed animation in seconds
 
-let mancala;
+const AIPlayDelay = 500;
 
 
-/* Here we will assume the capture pit in the 0th position is the enemy store
-and the capture pit in the pitsNum position is my store this way we can use % (mod) operator to
-distribute the seeds*/
 class Mancala {
-    constructor(pitsNum, seedsNum, boardID, mode, winLoseDrawFunct, ai_difficulty) {
+    /**
+     *
+     * @param {number} pitsNum 
+     * @param {number} seedsNum 
+     * @param {string} mode 
+     * @param {[Function, Function, Function]} winLoseDrawFunct 
+     * @param {number} ai_difficulty 
+     */
+    constructor(pitsNum, seedsNum, mode, winLoseDrawFunct, ai_difficulty) {
         this.pitsNum = pitsNum; // Number of pits per row (Stores are not counted here)
         this.pits = Array(this.pitsNum * 2 + 2); // Number of seeds each pit has (including both stores)
-        this.boardID = boardID; // ID where mancala will be constructed
         this.pitsElem = Array(this.pitsNum * 2 + 2); // Array that will hold the div that contains the pit and the value
         this.turn = true; // Bool indicating whose turn it is
         this.myStorePos = pitsNum + 1;
         this.enemyStorePos = 0;
         this.mode = mode; // Local, Multiplayer, vs AI
         this.ai = ai_difficulty; // Only used vs AI
-
+        this.boardEle = null;
         // Settings stores to both have 0 seeds
         this.pits[this.myStorePos] = 0;
         this.pits[this.enemyStorePos] = 0;
@@ -51,13 +55,32 @@ class Mancala {
             else
                 this.pits[i] = seedsNum;
         }
-        boardID.className = boardClass;
+
         this.clickEvent;
         this.winLoseDrawFunct = winLoseDrawFunct;
     }
 
-    initBoard(clickEvent) {
+    /**
+     * Configures a div with id=boardID to be a mancala board
+     * @param {Function} clickEvent 
+     * @param {string} boardID 
+     * @returns 
+     */
+    initBoard(clickEvent, boardID) {
         this.clickEvent = clickEvent;
+
+        // ID where mancala will be constructed
+        this.boardEle = document.getElementById(boardID);
+        if (this.boardEle == null) {
+            console.error("Invalid id, InitBoard()");
+            return -2;
+        }
+        this.boardEle.className = boardClass;
+
+        if (this.mode == 'invisible') {
+            return 0;
+        }
+
         this.initHoles();
         this.initSeeds();
 
@@ -67,12 +90,14 @@ class Mancala {
                 let hole = this.pitsElem[i].children[0]
                 hole.addEventListener("click", clickEvent, false);
                 hole.i = i;
+                hole.mancala = this;
             }
         else if (this.mode == 'multiplayer' || this.mode == 'ai') {
             for (let i = 1; i < this.myStorePos; i++) {
                 let hole = this.pitsElem[i].children[0]
                 hole.addEventListener("click", clickEvent, false);
                 hole.i = i;
+                hole.mancala = this;
             }
         }
         else {
@@ -92,12 +117,12 @@ class Mancala {
         enemyStore.classList = enemyStoreClass;
         enemyStoreParent.textContent = this.pits[this.enemyStorePos];
         enemyStoreParent.appendChild(enemyStore);
-        this.boardID.appendChild(enemyStoreParent);
+        this.boardEle.appendChild(enemyStoreParent);
 
         // Creating a grid between enemy store and my store
         let smallPitsGrid = document.createElement("div");
         smallPitsGrid.classList = PitsGridClass;
-        this.boardID.appendChild(smallPitsGrid);
+        this.boardEle.appendChild(smallPitsGrid);
 
         // Creating my store
         let myStoreParent = document.createElement("div");
@@ -106,7 +131,7 @@ class Mancala {
         myStore.classList = myStoreClass;
         myStoreParent.textContent = this.pits[this.myStorePos];
         myStoreParent.appendChild(myStore);
-        this.boardID.appendChild(myStoreParent);
+        this.boardEle.appendChild(myStoreParent);
 
 
         // Top grid that will hold enemy capture pits
@@ -162,6 +187,7 @@ class Mancala {
     }
 
     AImove() {
+
         if (this.ai == 0) {
             MancalaAI.randomPlay(this);
         }
@@ -183,12 +209,13 @@ class Mancala {
         let state = this.endTurn(i);
         this.highlightPits();
 
+        let s = this
         if (state != 0 && this.mode == 'ai' && !this.turn) {
-            this.AImove();
+            setTimeout(() => this.AImove(), AIPlayDelay);
         }
     }
 
-    // Sintoniza o quadro para ter a mesma configuração que o quadro do servidor
+    // Syncs board with another array pits
     syncBoard(pits, turn) {
         let pitsDiff = pits.slice().map((n, i) => n - this.pits[i]);
         let min = this.turn ? 1 : this.myStorePos + 1;
@@ -211,7 +238,7 @@ class Mancala {
         }
         if (!arraysEqual) {
             console.log("BOARD WAS NOT SYNCED!");
-            this.boardID.textContent = "";
+            this.boardEle.textContent = "";
             this.pits = pits;
             this.pitsElem = Array(this.pitsNum * 2 + 2);
             this.initBoard(this.clickEvent);
@@ -282,23 +309,25 @@ class Mancala {
     moveNSeeds(from_i, to_i, n) {
         if (n > this.pits[from_i]) return -1;
 
-        let fromValue = this.pitsElem[from_i].childNodes[0];
-        let fromPit = this.pitsElem[from_i].children[0];
-        let toValue = this.pitsElem[to_i].childNodes[0];
-        let toPit = this.pitsElem[to_i].children[0];
-
         this.pits[from_i] -= n;
         this.pits[to_i] += n;
 
-        // Moving n seeds
-        fromValue.nodeValue = this.pits[from_i];
-        for (let i = 0; i < n; i++)
-            Mancala.moveSeedTo(fromPit.firstChild, toPit, true);
-        toValue.nodeValue = this.pits[to_i];
+        if (this.mode != 'invisible') {
+            let fromValue = this.pitsElem[from_i].childNodes[0];
+            let fromPit = this.pitsElem[from_i].children[0];
+            let toValue = this.pitsElem[to_i].childNodes[0];
+            let toPit = this.pitsElem[to_i].children[0];
+            // Moving n seeds
+            fromValue.nodeValue = this.pits[from_i];
+            for (let i = 0; i < n; i++)
+                Mancala.moveSeedTo(fromPit.firstChild, toPit, true);
+            toValue.nodeValue = this.pits[to_i];
+        }
     }
 
     // highlights playable pits
     highlightPits() {
+        if (this.mode == 'invisible') return;
         if (this.turn) {
             // Highliting my pits
             for (let i = 1; i < this.myStorePos; i++) {
@@ -404,3 +433,4 @@ class MancalaAI {
         mancala.movePit(pitPlayed);
     }
 }
+

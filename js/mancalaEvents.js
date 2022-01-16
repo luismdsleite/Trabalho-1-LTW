@@ -6,6 +6,7 @@ function clickPit(event) {
     if (pit_i.className == seedClass) pit_i = pit_i.parentNode;
     // Finding out which pit was clicked and storing value in i
     let i = pit_i.i;
+    let mancala = pit_i.mancala;
     if (i == mancala.myStorePos || i == mancala.enemyStorePos) {
         // Stores are not clickable!
         console.error("A store was selected for click event");
@@ -29,6 +30,7 @@ function multiplayerClickPit(event) {
     if (pit_i.className == seedClass) pit_i = pit_i.parentNode;
     // Finding out which pit was clicked and storing value in i
     let i = pit_i.i;
+    let mancala = pit_i.mancala;
     if (i == mancala.myStorePos || i == mancala.enemyStorePos) {
         // Stores are not clickable!
         console.error("A store was selected for click event");
@@ -42,7 +44,7 @@ function multiplayerClickPit(event) {
     else if (mancala.pits[i] == 0)
         return -3;
     // Our local mancala pits range from [1:this.myStorePos] but server pits range from [0:this.myStorePos-1]
-    notifyServer(i-1);
+    notifyServer(i - 1);
     return 0;
 }
 

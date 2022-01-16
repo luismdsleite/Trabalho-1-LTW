@@ -1,0 +1,135 @@
+#overlay {
+  position: fixed;
+  opacity: 0;
+  transition: 200ms ease-in-out;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}
+
+.pop {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  transition: 200ms ease-in-out;
+  border: 1px solid black;
+  border-radius: 10px;
+  z-index: 10;
+  background-color: rgb(214, 95, 65);
+  min-width: 25%;
+  max-width: 80%;
+  max-height: 90%;
+  font-size: 1.25rem;
+  overflow: auto;
+}
+
+.pop_title {
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+.pop.active {
+  transform: translate(-50%, -50%);
+}
+
+.pop-header {
+  padding: 10px 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-bottom: 1px solid black;
+}
+
+.pop-body {
+  padding: 10px 15px;
+}
+
+.close-button {
+  position: absolute;
+  right: 0;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  background: none;
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+#overlay.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.button-1 {
+  margin-right: 0.5em;
+  margin-top: 2vh;
+  background-color: #946B45;
+  border: transparent;
+  padding: 0.5em;
+  font-size: 2rem;
+  font-weight: bold;
+  border-radius: 0.5em;
+  color: #fff;
+}
+
+form {
+  font-size: 1rem;
+}
+
+body {
+  background-image: url(/img/background.jpg);
+}
+
+h1 {
+  font-size: 5em;
+  text-align: center;
+}
+
+.neonText {
+  color: #fff;
+  text-shadow:
+      0 0 7px rgba(194, 125, 52, 0.65),
+      0 0 10px rgba(194, 125, 52, 0.65),
+      0 0 21px rgba(194, 125, 52, 0.65),
+      0 0 42px #E19C7F,
+      0 0 82px #E19C7F,
+      0 0 92px #E19C7F,
+      0 0 102px #E19C7F,
+      0 0 151px #E19C7F;
+}
+
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td, th {
+  text-align: left;
+  padding: 2%;
+}
+
+tr:nth-child(even) {
+  background-color: #dddddd;
+}
+
+.leave-button {
+  display: flex;
+  background-color: #e74412;
+  border: transparent;
+  padding: 0.5em;
+  font-size: 1.5rem;
+  font-weight: bold;
+  border-radius: 0.5em;
+  color: #fff;
+  margin: 2vh auto auto auto;
+}
+
+figcaption{
+  font-size: 0.9rem;
+  
+}

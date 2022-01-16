@@ -1,19 +1,44 @@
 "use strict"
+
+// tells Mancala class the div to create the board
+const boardID = 'mancala';
 // Used for configs
 const authForm = document.getElementById("auth-form");
 const authPop = document.getElementById("pop2");
 const configForm = document.getElementById("config-form");
 const configPop = document.getElementById("pop3");
-const minSeeds = 2;
+const minSeeds = 1;
 const maxSeeds = 14;
-const minPits = 2;
+const minPits = 1;
 const maxPits = 14;
+const defaultSeedsNum = 6;
+const defaultPitsNum = 6;
 const openPopButton = document.querySelectorAll('[data-pop-target]');
 const closePopButton = document.querySelectorAll('[data-close-button]');
 const overlay = document.getElementById('overlay');
-
+const modesIndex = { "multiplayer": 0, "local": 1, "AI_1": 2, "AI_2": 3, "AI_3": 4 };
+const configs = configForm.children;
 // Variables required for communicating with the server
 let nick, pass, game, eventSrc, opponent, multiplayerStatus, leaveButton;
+// Will hold the board class
+let mancala;
+
+
+configs.holesNum.min = minPits;
+configs.holesNum.max = maxPits;
+configs.seedsNum.min = minSeeds;
+configs.seedsNum.max = maxSeeds;
+
+// If a user enters the site with multiplayer already selected
+if (configs.opponent.selectedIndex == modesIndex.multiplayer)
+	configs.opponent.selectedIndex = modesIndex.local;
+
+// If value of pits or seeds does not fit range (or is undefined)
+if (!(minPits < configs.holesNum.value && configs.holesNum.value > maxPits)
+	&& !(minSeeds < configs.holesNum.value && configs.holesNum.value > maxSeeds)) {
+	configs.holesNum.value = defaultPitsNum;
+	configs.seedsNum.value = defaultSeedsNum;
+}
 
 parseConfigs(); // To have a predefined mancala
 
@@ -64,12 +89,13 @@ closePopButton.forEach(button => {
 });
 
 // Submit button on configurations
-configForm.children.configFormButton.addEventListener('click', parseConfigs, false);
+configs.configFormButton.addEventListener('click', parseConfigs, false);
 // Submit button on Authentication
 authForm.children.authButton.addEventListener('click', parseAuth, false);
 
+
 function parseConfigs() {
-	let configs = configForm.children;
+
 	let pitsNum = parseInt(configs.holesNum.value);
 	let seedsNum = parseInt(configs.seedsNum.value);
 
@@ -82,11 +108,10 @@ function parseConfigs() {
 		let boardElement = document.getElementById("mancala");
 		if (boardElement !== undefined) boardElement.textContent = '';
 
-		let ai;
 		// choosing mode
-		if (configs.opponent.selectedIndex == 1)
-			mancala = new Mancala(pitsNum, seedsNum, boardElement, 'local', [win, lose, draw]);
-		else if (configs.opponent.selectedIndex == 0) {
+		if (configs.opponent.selectedIndex == modesIndex.local)
+			mancala = new Mancala(pitsNum, seedsNum, 'local', [win, lose, draw]);
+		else if (configs.opponent.selectedIndex == modesIndex.multiplayer) {
 			if (nick == undefined) {
 				alert("Login is required for multiplayer, please log in and try again");
 				closePop(configPop);
@@ -102,13 +127,12 @@ function parseConfigs() {
 			leaveButton.addEventListener('click',
 				() => leave(nick, pass, game),
 				false);
-			mancala = new Mancala(pitsNum, seedsNum, boardElement, 'multiplayer', [win, lose, draw]);
-			mancala.boardID.parentNode.insertBefore(leaveButton, mancala.boardID.nextSibling);
-			setUpMultiplayer(pitsNum, seedsNum, boardElement);
+			mancala = new Mancala(pitsNum, seedsNum, 'multiplayer', [win, lose, draw]);
+			boardElement.parentNode.insertBefore(leaveButton, boardElement.nextSibling);
+			setUpMultiplayer(pitsNum, seedsNum, boardID);
 		}
 		else {
-			mancala = new Mancala(pitsNum, seedsNum, boardElement, 'ai', [win, lose, draw], ai_difficulty = configs.opponent.selectedIndex - 2);
-			ai = configs.opponent.selectedIndex;
+			mancala = new Mancala(pitsNum, seedsNum, 'ai', [win, lose, draw], configs.opponent.selectedIndex - 2);
 		}
 
 		// choosing who plays first
@@ -116,8 +140,8 @@ function parseConfigs() {
 			mancala.changeTurn();
 		}
 		// Initializing mancala with function in boardEvents.js
-		if (mancala.mode != 'multiplayer') mancala.initBoard(clickPit);
-		if (mancala.mode == 'ai' && !mancala.turn) mancala.AImove();
+		if (mancala.mode != 'multiplayer') mancala.initBoard(clickPit, boardID);
+		if (mancala.mode == 'ai' && !mancala.turn) setTimeout(() => mancala.AImove(), AIPlayDelay);
 
 	}
 	else {
@@ -140,10 +164,10 @@ async function parseAuth() {
 	if (req.ok) {
 		nick = formNick;
 		pass = formPass;
-		alert("Logado com sucesso");
+		alert("Logged in with success");
 	} else {
-		if (req.status == 400)
-			alert("An existing user with a different password already exists");
+		let json = await req.json();
+		alert(json.error);
 		nick = undefined;
 		pass = undefined;
 	}
@@ -159,7 +183,7 @@ async function setUpMultiplayer(pitsNum, seedsNum) {
 	if (req.ok) {
 		let data = await req.json();
 		game = data.game;
-		multiplayerStatus.textContent = "Waiting for a plyer to join";
+		multiplayerStatus.textContent = "Waiting for a player to join";
 		eventSrc = await update(nick, game, serverUpdate, serverError);
 	} else {
 		alert("An error ocurred while creating a game");
@@ -169,12 +193,14 @@ async function setUpMultiplayer(pitsNum, seedsNum) {
 async function serverUpdate(e) {
 	let data = JSON.parse(e.data);
 	if (data.winner !== undefined) {
-		if (data.winner === null)
-			setTimeout(() => alert("Stopped Search"), seedAnimationTime * 1000 * 2);
+		if (data.winner === null) {
+			if (data.board !== undefined) draw();
+			else setTimeout(() => alert("Stopped Search"), seedAnimationTime * 1000 * 2);
+		}
 		else if (data.winner === nick)
-			setTimeout(() => alert("You Won"), seedAnimationTime * 1000 * 2);
+			win()
 		else if (data.winner === opponent)
-			setTimeout(() => alert("You Lost"), seedAnimationTime * 1000 * 2);
+			lose()
 		multiplayerStatus.parentNode.removeChild(multiplayerStatus);
 		leaveButton.parentNode.removeChild(leaveButton);
 		multiplayerStatus = undefined;
@@ -191,7 +217,7 @@ async function serverUpdate(e) {
 			if ((data.board.turn != nick && mancala.turn) || (data.board.turn == nick && !mancala.turn)) {
 				mancala.changeTurn();
 			}
-			mancala.initBoard(multiplayerClickPit);
+			mancala.initBoard(multiplayerClickPit, boardID);
 			Object.keys(data.stores).forEach(player => {
 				if (player != nick) opponent = player;
 			});
@@ -225,24 +251,21 @@ async function serverError() {
 async function notifyServer(i) {
 	let req = await notify(nick, pass, game, i);
 	if (!req.ok) {
-		alert("Something went wrong");
+		let json = await req.json();
+		alert(json.error);
 	}
 }
 
 
 function win() {
-	if (mancala.mode == 'multiplayer') return;
 	let msg = mancala.mode == "local" ? "Player 1 Won" : "You Won";
 	setTimeout(() => alert(msg), seedAnimationTime * 1000 * 2);
 }
 function lose() {
-	if (mancala.mode == 'multiplayer') return;
 	let msg = mancala.mode == "local" ? "Player 2 Won" : "You Lost";
 	setTimeout(() => alert(msg), seedAnimationTime * 1000 * 2);
 }
 function draw() {
-	if (mancala.mode == 'multiplayer') return;
 	let msg = "Draw";
 	setTimeout(() => alert(msg), seedAnimationTime * 1000 * 2);
 }
-
