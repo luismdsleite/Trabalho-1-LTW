@@ -1,10 +1,10 @@
 // Functions responsible for communicating with the server
 "use strict"
 
-const server = 'twserver.alunos.dcc.fc.up.pt';
-//const server = '192.168.1.57';
-const port = 8008;
-//const port = 3000;
+//const server = 'twserver.alunos.dcc.fc.up.pt';
+const server = '192.168.1.57';
+//const port = 8008;
+const port = 3000;
 
 /**
  * Only function that interacts with server

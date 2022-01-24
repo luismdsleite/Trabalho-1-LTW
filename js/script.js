@@ -252,7 +252,7 @@ async function notifyServer(i) {
 	let req = await notify(nick, pass, game, i);
 	if (!req.ok) {
 		let json = await req.json();
-		alert(json.error);
+		console.error(json.error);
 	}
 }
 

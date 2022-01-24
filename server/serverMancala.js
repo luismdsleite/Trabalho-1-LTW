@@ -1,40 +1,12 @@
-"use strict"
-// Used for Board class
-const boardClass = "holesGrid";
-const PitsGridClass = "smallHolesGrid";
-const topPitsGridClass = "smallHolesTop";
-const botPitsGridClass = "smallHolesBottom";
-const pitTopClass = "hole smallHoleTop";
-const pitBottomClass = "hole smallHoleBottom";
-const enemyStoreClass = "hole bigHole bigHoleLeft";
-const myStoreClass = "hole bigHole bigHoleRight";
-const storeLeftParent = "bigHoleLeftParent";
-const storeRightParent = "bigHoleRightParent";
-const pitTopParent = "smallHoleTopParent";
-const pitBottomParent = "smallHoleBottomParent";
-const seedClass = "seed";
-// seed width and height in viewport units
-const seedWidth = 2;
-const seedHeight = 3;
-
-// Used to hightlight pits
-const pitShadow = "inset 10px 10px 10px rgba(0, 0, 0, 0.5)";
-const pitHighlightBlue = "0 0 2vh blue";
-const pitHighlightRed = "0 0 2vh red";
-const seedAnimationTime = 0.25; // time for seed animation in seconds
-
-const AIPlayDelay = 500;
-
-
 class Mancala {
-/**
-     *
-     * @param {number} pitsNum 
-     * @param {number} seedsNum 
-     * @param {string} mode 
-     * @param {[Function, Function, Function]} winLoseDrawFunct 
-     * @param {number} ai_difficulty 
-     */
+    /**
+         *
+         * @param {number} pitsNum 
+         * @param {number} seedsNum 
+         * @param {string} mode 
+         * @param {[Function, Function, Function]} winLoseDrawFunct 
+         * @param {number} ai_difficulty 
+         */
     constructor(pitsNum, seedsNum, mode, winLoseDrawFunct, ai_difficulty) {
         this.pitsNum = pitsNum; // Number of pits per row (Stores are not counted here)
         this.pits = Array(this.pitsNum * 2 + 2); // Number of seeds each pit has (including both stores)
@@ -430,111 +402,4 @@ class Mancala {
     }
 }
 
-class MancalaAI {
-    /**
-     * @param {Mancala} mancala 
-     */
-    static randomPlay(mancala) {
-        let pitPlayed;
-        do {
-            pitPlayed = Math.floor(Math.random() * mancala.pitsNum) + 1;
-            pitPlayed += mancala.myStorePos;
-        } while (mancala.pits[pitPlayed] == 0);
-        mancala.movePit(pitPlayed);
-    }
-
-    /**
-     * @param {Mancala} mancala
-     * @returns {Number}
-     */
-    static greedyPlay(mancala) {
-        let copy = MancalaAI.copyBoard(mancala);
-        let max = Number.MIN_SAFE_INTEGER, maxIndex = 0;
-        for (let i = mancala.myStorePos + 1; i < mancala.pitsNum * 2 + 2; i++) {
-            copy.pits = mancala.pits.slice();
-            copy.turn = mancala.turn;
-            if (copy.pits[i] > 0) {
-                copy.movePit(i);
-                let score = MancalaAI.score(copy);
-                if (max < score) {
-                    max = score;
-                    maxIndex = i;
-                }
-            }
-        }
-        mancala.movePit(maxIndex);
-    }
-
-    static bestMove(mancala) {
-        /* let bestMove = -1, bestScore = Number.MIN_SAFE_INTEGER;
-        for (let i = mancala.myStorePos + 1; i < mancala.pitsNum * 2 + 2; i++) {
-            if(mancala.pits[i] > 0)
-            let copy = new Mancala(mancala.pitsNum, mancala.seedsNum, "invisible", [() => { }, () => { }, () => { }]);
-                    
-                let score = MancalaAI.minimax(mancala);
-                if(score > bestScore){
-                    bestMove = i;
-                    bestScore = score;
-                }
-        }
-        return score; */
-        let score = MancalaAI.minimax(mancala);
-        return score;
-    }
-
-    /**
-     * Min Max algorithm adapted to the Mancala class
-     * @param {Mancala} mancala 
-     * @returns {number} Best possible move
-     */
-    static minimax(mancala) {
-        if (mancala.checkIfEnded())
-            return MancalaAI.score(mancala);
-        // AI turn
-        if (!mancala.turn) {
-            let bestScore = Number.MIN_SAFE_INTEGER;
-            // For all possible moves
-            for (let i = mancala.myStorePos + 1; i < mancala.pitsNum * 2 + 2; i++) {
-                if (mancala.pits[i] > 0) {
-                    let copy = new Mancala(mancala.pitsNum, mancala.seedsNum, "invisible", [() => { }, () => { }, () => { }]);
-                    copy.pits = mancala.pits.slice();
-                    copy.turn = mancala.turn;
-                    copy.movePit(i);
-                    bestScore = Math.max(bestScore, MancalaAI.minimax(copy));
-                }
-            }
-            return bestScore;
-        }
-        // Players turn
-        else {
-            let bestScore = Number.MAX_SAFE_INTEGER;
-            for (let i = mancala.enemyStorePos + 1; i < mancala.myStorePos; i++) {
-                if (mancala.pits[i] > 0) {
-                    let copy = new Mancala(mancala.pitsNum, mancala.seedsNum, "invisible", [() => { }, () => { }, () => { }]);
-                    copy.pits = mancala.pits.slice();
-                    copy.turn = mancala.turn;
-                    copy.movePit(i);
-                    bestScore = Math.min(bestScore, MancalaAI.minimax(copy));
-                }
-            }
-            return bestScore;
-        }
-    }
-
-    /**
-     * @param {Mancala} mancala 
-     * @returns {number}
-     */
-    static score(mancala) {
-        return mancala.pits[mancala.enemyStorePos] - mancala.pits[mancala.myStorePos];
-    }
-
-    /**
-     * @param {Mancala} mancala
-     * @returns {Mancala} Copy of mancala
-     */
-    static copyBoard(mancala) {
-        return new Mancala(mancala.pitsNum, mancala.seedsNum, "invisible", [() => { }, () => { }, () => { }]);
-    }
-}
-
+module.exports = { Mancala };
