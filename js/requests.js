@@ -4,7 +4,7 @@
 //const server = 'twserver.alunos.dcc.fc.up.pt';
 const server = '192.168.1.57';
 //const port = 8008;
-const port = 3000;
+const port = 9059;
 
 /**
  * Only function that interacts with server

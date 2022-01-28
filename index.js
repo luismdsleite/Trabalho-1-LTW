@@ -2,19 +2,19 @@ const fs = require("fs");
 const crypto = require('crypto');
 const http = require('http');
 const process = require('process');
-const mancala = require('./serverMancala');
+const mancala = require('./server/serverMancala');
 
 const hostname = '192.168.1.57';
-const port = 3000;
+const port = 9059;
 const originHost = '192.168.1.57';
 const originPort = 5500;
-const leaderboardPath = 'ranking.json';
-const usersPath = 'users.json'
+const leaderboardPath = './server/ranking.json';
+const usersPath = './server/users.json'
 const backupTimer = 5; // In minutes
 
 
 let leaderboard = fs.existsSync(leaderboardPath) ? JSON.parse(fs.readFileSync(leaderboardPath)) : {};
-let users =  fs.existsSync(usersPath) ? JSON.parse(fs.readFileSync(usersPath)) : {};
+let users = fs.existsSync(usersPath) ? JSON.parse(fs.readFileSync(usersPath)) : {};
 let games = {}; // Games ongoing
 let userToID = {} // list of users and its respective gameIDs
 backupData(); // Backs up data from backupTimer minutes, calls itself after executing
@@ -227,25 +227,30 @@ function leave(res, data) {
                 game.p2Res.write("data:" + "\n\n")
                 game.p2Res.end();
             } else {
-                game.p2Res.write("data:" + "\n\n")
-                game.p2Res.end();
+                game.p1Res.write("data:" + "\n\n")
+                game.p1Res.end();
             }
         } else {
             if (game.p1 === nick) {
+                increaseRanking(game.p2, game.p1, game.p2);
                 let winner = {};
                 winner.winner = game.p2;
+                winner = JSON.stringify(winner);
+                game.p1Res.end("data:" + winner + "\n\n");
                 game.p2Res.write("data:" + winner + "\n\n")
                 game.p2Res.end();
             } else {
+                increaseRanking(game.p1, game.p1, game.p2);
                 let winner = {};
                 winner.winner = game.p1;
+                winner = JSON.stringify(winner);
+                game.p2Res.end("data:" + winner + "\n\n");
                 game.p1Res.write("data:" + winner + "\n\n")
                 game.p1Res.end();
             }
-            games[gameID] = undefined;
-            userToID[nick] = undefined;
+            delete userToID[games[gameID].p1];
+            delete userToID[games[gameID].p2];
             delete games[gameID];
-            delete userToID[nick];
             res.write(JSON.stringify({}));
         }
     }
@@ -332,25 +337,34 @@ function notify(res, data) {
         if (score > 0) convertedMancala.winner = game.p1;
         else if (score < 0) convertedMancala.winner = game.p2;
         else data.winner = null;
-    }
-    convertedMancala = JSON.stringify(convertedMancala);
-    game.p1Res.write("data:" + convertedMancala + "\n\n");
-    game.p2Res.write("data:" + convertedMancala + "\n\n");
-
-    /* if (game.mancala.checkIfEnded()) {
+        increaseRanking(convertedMancala.winner, game.p1, game.p2);
+        convertedMancala = JSON.stringify(convertedMancala);
+        game.p1Res.write("data:" + convertedMancala + "\n\n");
+        game.p2Res.write("data:" + convertedMancala + "\n\n");
+        delete game[userToID[game.p1]];
+        delete game[userToID[game.p2]];
         delete userToID[game.p1];
         delete userToID[game.p2];
         game.p1Res.end();
         game.p2Res.end();
-        delete game[gameID];
-    } */
-
+    } else {
+        convertedMancala = JSON.stringify(convertedMancala);
+        game.p1Res.write("data:" + convertedMancala + "\n\n");
+        game.p2Res.write("data:" + convertedMancala + "\n\n");
+    }
     res.write(JSON.stringify(resData));
 }
 
 function ranking(res) {
-    res.write(JSON.stringify(leaderboard));
+    res.write(JSON.stringify({
+        "ranking": leaderboard.ranking
+            .sort(function (a, b) {
+                return b.victories - a.victories;
+            })
+            .slice(0, 10)
+    }));
 }
+
 function register(res, data) {
     let nick, pass;
     let resData = {};
@@ -478,3 +492,31 @@ function mancalaConverter(game) {
     return data;
 }
 
+function increaseRanking(winnerNick, nick1, nick2) {
+    let ranking = leaderboard.ranking;
+    let rank1 = ranking.find(e => e.nick == nick1);
+    let rank2 = ranking.find(e => e.nick == nick2);
+    if (rank1 === undefined) {
+        rank1 = {
+            "nick": nick1,
+            "victories": 0,
+            "games": 0
+        };
+        ranking.push(rank1);
+    }
+    if (rank2 === undefined) {
+        rank2 = {
+            "nick": nick2,
+            "victories": 0,
+            "games": 0
+        };
+        ranking.push(rank2);
+    }
+    rank1.games += 1;
+    rank2.games += 1;
+    if (winnerNick == nick1) {
+        rank1.victories += 1;
+    } else if (winnerNick == nick2) {
+        rank2.victories += 1;
+    }
+}
